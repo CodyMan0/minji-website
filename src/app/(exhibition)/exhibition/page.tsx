@@ -1,16 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PHOTOS } from "@/lib/constants";
 import PhotoViewer from "@/components/gallery/PhotoViewer";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 /** Map photo7-10 to photo1-4 since those files don't exist */
 function getPhotoSrc(index: number): string {
@@ -25,187 +21,177 @@ const photos = PHOTOS.map((p, i) => ({
   src: getPhotoSrc(i),
 }));
 
-/** Reveal gallery uses first 6 photos in an asymmetric layout */
-const revealPhotos = photos.slice(0, 6);
-
-/** Horizontal gallery uses all 10 */
-const horizontalPhotos = photos;
-
-/** Layout config for the asymmetric reveal grid */
-const revealLayout: { colSpan: string; aspectRatio: string }[] = [
-  { colSpan: "col-span-8 col-start-1", aspectRatio: "aspect-[4/3]" },
-  { colSpan: "col-span-5 col-start-7", aspectRatio: "aspect-[3/4]" },
-  { colSpan: "col-span-6 col-start-2", aspectRatio: "aspect-[16/9]" },
-  { colSpan: "col-span-5 col-start-6", aspectRatio: "aspect-[3/2]" },
-  { colSpan: "col-span-7 col-start-1", aspectRatio: "aspect-[3/4]" },
-  { colSpan: "col-span-6 col-start-5", aspectRatio: "aspect-[4/3]" },
-];
+/** Ease curve for card animations - smooth deceleration */
+const CARD_EASE: [number, number, number, number] = [0.32, 0.72, 0, 1];
+const ANIMATION_DURATION = 0.6;
+const COOLDOWN_MS = 600;
 
 export default function ExhibitionPage() {
-  const revealSectionRef = useRef<HTMLDivElement>(null);
-  const revealItemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const horizontalSectionRef = useRef<HTMLDivElement>(null);
-  const horizontalContainerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedPhoto, setSelectedPhoto] = useState<
     (typeof photos)[number] | null
   >(null);
+  const isAnimating = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Section 2: Blur-to-sharp reveal for each photo
-      revealItemRefs.current.forEach((el) => {
-        if (!el) return;
-        gsap.fromTo(
-          el,
-          { opacity: 0, filter: "blur(20px)" },
-          {
-            opacity: 1,
-            filter: "blur(0px)",
-            duration: 1,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: el,
-              start: "top 85%",
-              end: "top 40%",
-              scrub: 1,
-            },
-          }
-        );
-      });
+  /* ---- Wheel handler with cooldown ---- */
+  const handleWheel = useCallback(
+    (e: WheelEvent) => {
+      e.preventDefault();
+      if (isAnimating.current) return;
 
-      // Section 3: Horizontal scroll pinned gallery
-      const container = horizontalContainerRef.current;
-      const section = horizontalSectionRef.current;
-      if (container && section) {
-        const getScrollAmount = () =>
-          -(container.scrollWidth - window.innerWidth);
-
-        gsap.to(container, {
-          x: getScrollAmount,
-          ease: "none",
-          scrollTrigger: {
-            trigger: section,
-            pin: true,
-            pinSpacing: true,
-            pinReparent: false,
-            scrub: 1,
-            end: () => "+=" + container.scrollWidth,
-            invalidateOnRefresh: true,
-          },
-        });
+      if (e.deltaY > 0 && currentIndex < photos.length - 1) {
+        isAnimating.current = true;
+        setCurrentIndex((prev) => prev + 1);
+        setTimeout(() => {
+          isAnimating.current = false;
+        }, COOLDOWN_MS);
+      } else if (e.deltaY < 0 && currentIndex > 0) {
+        isAnimating.current = true;
+        setCurrentIndex((prev) => prev - 1);
+        setTimeout(() => {
+          isAnimating.current = false;
+        }, COOLDOWN_MS);
       }
-    });
+    },
+    [currentIndex]
+  );
 
+  /* Attach wheel as non-passive so preventDefault works */
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.addEventListener("wheel", handleWheel, { passive: false });
     return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-      ctx.revert();
+      el.removeEventListener("wheel", handleWheel);
     };
-  }, []);
+  }, [handleWheel]);
+
+  /* ---- Background click -> go back ---- */
+  const handleBackgroundClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      router.back();
+    }
+  };
 
   return (
     <>
-      {/* ===== Section 1: Hero Title ===== */}
-      <section className="h-[calc(100vh-5rem)] flex flex-col items-center justify-center relative px-8">
-        <div className="text-center">
-          <motion.p
-            className="text-sm uppercase tracking-[0.3em] text-zinc-500 mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
-          >
-            JDZ CHUNG
-          </motion.p>
-          <motion.h1
-            className="text-6xl md:text-8xl lg:text-9xl font-light tracking-tight leading-none"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, delay: 0.4 }}
-          >
-            The ART OF
-          </motion.h1>
-          <motion.h1
-            className="text-7xl md:text-[10rem] lg:text-[14rem] font-extralight tracking-tighter leading-none mt-2"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, delay: 0.6 }}
-          >
-            LIGHT
-          </motion.h1>
-        </div>
-        <motion.p
-          className="absolute bottom-12 text-xs uppercase tracking-[0.2em] text-zinc-600"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1.2 }}
-        >
-          online exhibition
-        </motion.p>
-      </section>
+      {/* Full-screen black canvas */}
+      <div
+        ref={containerRef}
+        className="fixed inset-0 bg-black overflow-hidden cursor-default"
+        onClick={handleBackgroundClick}
+        style={{ zIndex: 1 }}
+      >
+        {/* ---- Stacked card deck ---- */}
+        {photos.map((photo, i) => {
+          const offset = i - currentIndex;
+          const isGone = offset < 0;
 
-      {/* ===== Section 2: Photo Reveal Gallery ===== */}
-      <section ref={revealSectionRef} className="py-32 px-8 md:px-16">
-        <div className="max-w-7xl mx-auto grid grid-cols-12 gap-y-24 md:gap-y-40">
-          {revealPhotos.map((photo, i) => (
-            <div
+          /*
+           * Card positioning to match the screenshot:
+           * - Front card (offset=0) sits at bottom-left area
+           * - Each subsequent card offsets right (~100px) and up (~75px)
+           * - Slight rotation increase per card for depth
+           * - Cards beyond visible range (offset > 7) are hidden
+           */
+          const baseX = -22; // vw from center - starts further left
+          const baseY = 15; // vh from center - pushes down more
+          const spreadX = 75; // px offset per card to the right (tighter)
+          const spreadY = 60; // px offset per card upward (tighter)
+          const isHovered = hoveredIndex === i;
+          const hoverShift = isHovered && !isGone ? 30 : 0; // px shift right on hover
+
+          return (
+            <motion.div
               key={photo.id}
-              ref={(el) => {
-                revealItemRefs.current[i] = el;
+              className="absolute cursor-pointer"
+              style={{
+                zIndex: photos.length - i,
+                transformOrigin: "center center",
               }}
-              className={`${revealLayout[i].colSpan} opacity-0`}
+              initial={false}
+              animate={{
+                x: isGone
+                  ? "-120vw"
+                  : `calc(50vw + ${baseX}vw + ${offset * spreadX + hoverShift}px)`,
+                y: isGone
+                  ? "50vh"
+                  : `calc(50vh + ${baseY}vh + ${-offset * spreadY}px)`,
+                scale: isGone ? 0.8 : 1,
+                opacity: isGone ? 0 : offset > 7 ? 0 : 1,
+              }}
+              transition={{
+                duration: isHovered ? 0.3 : ANIMATION_DURATION,
+                ease: CARD_EASE,
+              }}
+              onMouseEnter={() => setHoveredIndex(i)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isGone && offset <= 7) {
+                  setSelectedPhoto(photo);
+                }
+              }}
             >
-              <div className={`relative ${revealLayout[i].aspectRatio} overflow-hidden`}>
+              {/* Card frame with shadow for depth */}
+              <div
+                className="relative overflow-hidden shadow-2xl"
+                style={{
+                  width: "clamp(300px, 30vw, 500px)",
+                  height: "clamp(375px, 37vw, 625px)",
+                  /* Translate so the card's anchor is its center */
+                  transform: "translate(-50%, -50%)",
+                  boxShadow:
+                    offset === 0
+                      ? "0 25px 60px rgba(0,0,0,0.7), 0 10px 20px rgba(0,0,0,0.5)"
+                      : "0 15px 40px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.3)",
+                }}
+              >
                 <Image
                   src={photo.src}
                   alt={photo.alt}
                   fill
                   className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 60vw"
+                  sizes="(max-width: 768px) 260px, 400px"
+                  priority={i < 3}
                 />
               </div>
-              <p className="mt-3 text-[10px] uppercase tracking-widest text-zinc-600">
-                {photo.id}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
+            </motion.div>
+          );
+        })}
 
-      {/* ===== Section 3: Horizontal Scroll Gallery ===== */}
-      <section
-        ref={horizontalSectionRef}
-        className="relative overflow-hidden"
-      >
+        {/* ---- Bottom sub-navigation (OVERVIEW / INDEX tabs) ---- */}
         <div
-          ref={horizontalContainerRef}
-          className="flex items-center gap-8 px-[10vw] h-screen"
+          className="fixed bottom-4 left-8 flex items-center gap-3 z-50"
+          style={{ marginLeft: "60px" }}
         >
-          {horizontalPhotos.map((photo) => (
-            <div
-              key={photo.id}
-              className="shrink-0 cursor-pointer group"
-              onClick={() => setSelectedPhoto(photo)}
+          <div className="flex bg-zinc-900/80 backdrop-blur-sm rounded-md px-0.5 py-0.5 gap-0.5 text-[10px] uppercase tracking-widest font-light">
+            <Link
+              href="/exhibition"
+              className="px-3 py-1.5 bg-white/10 text-white rounded-sm transition-colors"
             >
-              <div className="relative h-[70vh] w-auto aspect-[3/4] overflow-hidden">
-                <Image
-                  src={photo.src}
-                  alt={photo.alt}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  sizes="(max-width: 768px) 80vw, 40vw"
-                />
-              </div>
-              <p className="mt-3 text-[10px] uppercase tracking-widest text-zinc-600 group-hover:text-zinc-400 transition-colors">
-                {photo.id}
-              </p>
-            </div>
-          ))}
+              Overview
+            </Link>
+            <Link
+              href="/gallery"
+              className="px-3 py-1.5 text-zinc-500 hover:text-zinc-300 rounded-sm transition-colors"
+            >
+              Index
+            </Link>
+          </div>
         </div>
-      </section>
 
-      {/* Spacer after pinned section so the page doesn't end abruptly */}
-      <div className="h-[20vh]" />
+        {/* ---- Card counter ---- */}
+        <div className="fixed bottom-4 right-8 z-50 text-[10px] uppercase tracking-widest text-zinc-600 font-light">
+          {String(currentIndex + 1).padStart(2, "0")} /{" "}
+          {String(photos.length).padStart(2, "0")}
+        </div>
+      </div>
 
-      {/* ===== Photo Viewer Overlay ===== */}
+      {/* ---- Photo Viewer Overlay ---- */}
       <PhotoViewer
         photo={selectedPhoto}
         onClose={() => setSelectedPhoto(null)}

@@ -1,7 +1,6 @@
 "use client";
 
 import Navigation from "@/components/layout/Navigation";
-import SideNav from "@/components/layout/SideNav";
 import BottomBar from "@/components/layout/BottomBar";
 
 export default function ExhibitionLayout({
@@ -12,7 +11,6 @@ export default function ExhibitionLayout({
   return (
     <>
       <Navigation />
-      <SideNav />
       <main className="pt-20">{children}</main>
       <BottomBar />
     </>

@@ -70,7 +70,7 @@ export default function LoadingPage() {
         {phase >= 2 && (
           <div className="flex flex-col items-center gap-6">
             {/* Main title with typewriter */}
-            <h1 className="text-4xl md:text-6xl font-bold text-white uppercase tracking-[0.3em]">
+            <h1 className="text-4xl md:text-6xl font-normal text-white uppercase tracking-[0.3em]">
               {displayText}
             </h1>
 

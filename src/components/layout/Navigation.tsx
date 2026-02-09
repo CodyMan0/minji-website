@@ -46,9 +46,13 @@ export default function Navigation() {
         </div>
         <Link
           href="/countdown"
-          className="bg-zinc-800 rounded-xl px-5 py-2.5 text-xs tracking-wider text-white/70 tabular-nums hover:text-white transition-colors"
+          className={`rounded-xl px-5 py-2.5 text-xs tracking-wider tabular-nums transition-colors ${
+            pathname === "/countdown"
+              ? "bg-white text-black"
+              : "bg-zinc-800 text-white/70 hover:text-white"
+          }`}
         >
-          {countdown}
+          {pathname === "/countdown" ? "COMING SOON" : countdown}
         </Link>
       </div>
     </nav>

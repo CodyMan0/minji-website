@@ -15,7 +15,7 @@ export function useKoreanTime() {
         hour12: false,
       });
       const formatted = formatter.format(new Date());
-      setTime(`${formatted} (KRT)`);
+      setTime(`${formatted} (KST)`);
     };
 
     updateTime();

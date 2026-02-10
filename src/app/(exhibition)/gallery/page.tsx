@@ -2,34 +2,58 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { PHOTOS } from "@/lib/constants";
+import { photos } from "@/lib/photos";
+import type { Photo } from "@/lib/photos";
 import PhotoViewer from "@/components/gallery/PhotoViewer";
 
-function getPhotoSrc(index: number): string {
-  if (index >= 6) return `/images/photo${index - 6 + 1}.jpg`;
-  return `/images/photo${index + 1}.jpg`;
-}
-
 /** Each photo's aspect ratio matching the design layout */
-const photoAspects: string[] = [
-  "aspect-[4/3]", // JDZ-01: landscape
-  "aspect-[4/3]", // JDZ-02: landscape
-  "aspect-square", // JDZ-03: square
-  "aspect-[3/4]", // JDZ-04: portrait
-  "aspect-[3/4]", // JDZ-05: portrait
-  "aspect-square", // JDZ-06: square
-  "aspect-square", // JDZ-07: square
-  "aspect-[4/3]", // JDZ-08: landscape
-  "aspect-[3/4]", // JDZ-09: portrait
-  "aspect-[3/4]", // JDZ-10: portrait
+const PHOTO_ASPECTS: string[] = [
+  "aspect-[4/3]",
+  "aspect-[4/3]",
+  "aspect-square",
+  "aspect-[3/4]",
+  "aspect-[3/4]",
+  "aspect-square",
+  "aspect-square",
+  "aspect-[4/3]",
+  "aspect-[3/4]",
+  "aspect-[3/4]",
 ];
 
-const photos = PHOTOS.map((p, i) => ({ ...p, src: getPhotoSrc(i) }));
+function BackToTopButton() {
+  return (
+    <section className="pb-32 flex flex-col items-center justify-center gap-6">
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        className="flex flex-col items-center gap-6 cursor-pointer group"
+      >
+        <div className="w-14 h-14 rounded-sm bg-zinc-800/80 flex items-center justify-center transition-colors group-hover:bg-white">
+          <svg
+            width="36"
+            height="36"
+            viewBox="0 0 24 24"
+            fill="none"
+            className="text-white group-hover:text-black transition-colors"
+          >
+            <path
+              d="M12 20V4M12 4L5 11M12 4L19 11"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+        <span className="text-md uppercase tracking-[0.2em] text-white font-light">
+          BACK TO TOP
+        </span>
+      </button>
+    </section>
+  );
+}
 
 export default function GalleryPage() {
-  const [selectedPhoto, setSelectedPhoto] = useState<
-    (typeof photos)[number] | null
-  >(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
 
   return (
     <>
@@ -42,7 +66,7 @@ export default function GalleryPage() {
               onClick={() => setSelectedPhoto(photo)}
             >
               <div
-                className={`relative ${photoAspects[i]} overflow-hidden bg-zinc-900`}
+                className={`relative ${PHOTO_ASPECTS[i]} overflow-hidden bg-zinc-900`}
               >
                 <Image
                   src={photo.src}
@@ -60,8 +84,7 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      {/* ---- Text Section ---- */}
-      <section className="py-32 flex flex-col items-center justify-center gap-4 px-8 text-whites">
+      <section className="py-32 flex flex-col items-center justify-center gap-4 px-8">
         <p className="text-sm md:text-base uppercase tracking-[0.3em] text-center">
           WHAT DO YOU THINK IT WAS SHOT ON?
           <span className="inline-block w-2.5 h-4 bg-white ml-2 align-middle animate-pulse" />
@@ -72,33 +95,7 @@ export default function GalleryPage() {
         </p>
       </section>
 
-      <section className="pb-32 flex flex-col items-center justify-center gap-6">
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="flex flex-col items-center gap-6 cursor-pointer group"
-        >
-          <div className="w-14 h-14 rounded-sm bg-zinc-800/80 flex items-center justify-center transition-colors group-hover:bg-white">
-            <svg
-              width="36"
-              height="36"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="text-white group-hover:text-black transition-colors"
-            >
-              <path
-                d="M12 20V4M12 4L5 11M12 4L19 11"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <span className="text-md uppercase tracking-[0.2em] text-white font-light">
-            BACK TO TOP
-          </span>
-        </button>
-      </section>
+      <BackToTopButton />
 
       <PhotoViewer
         photo={selectedPhoto}

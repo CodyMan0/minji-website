@@ -3,12 +3,7 @@
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCallback, useEffect } from "react";
-
-interface Photo {
-  id: string;
-  src: string;
-  alt: string;
-}
+import { Photo } from "@/lib/photos";
 
 interface PhotoViewerProps {
   photo: Photo | null;

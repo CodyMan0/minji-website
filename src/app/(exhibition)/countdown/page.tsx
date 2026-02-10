@@ -2,15 +2,13 @@
 
 import { useCountdown } from "@/hooks/useCountdown";
 import { LAUNCH_DATE } from "@/lib/constants";
+import { padTwo } from "@/lib/format";
 
 export default function CountdownPage() {
   const { days, hours, minutes, seconds } = useCountdown(LAUNCH_DATE);
 
-  const pad = (n: number) => String(n).padStart(2, "0");
-
-  // Total hours including days
   const totalHours = days * 24 + hours;
-  const display = `${pad(totalHours)}:${pad(minutes)}:${pad(seconds)} (KRT)`;
+  const display = `${padTwo(totalHours)}:${padTwo(minutes)}:${padTwo(seconds)} (KST)`;
 
   return (
     <div className="min-h-[calc(100vh-5rem)] flex flex-col items-center justify-center">

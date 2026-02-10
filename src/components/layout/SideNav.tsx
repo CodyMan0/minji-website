@@ -10,14 +10,14 @@ export default function SideNav() {
         className="text-xs uppercase tracking-wide text-zinc-500 hover:text-white transition-colors"
         style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
       >
-        INDEX
+        OVERVIEW
       </Link>
       <Link
         href="/master"
         className="text-xs uppercase tracking-wide text-zinc-500 hover:text-white transition-colors"
         style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
       >
-        Master JDZ
+        MASTER PHOTOGRAPHER JDZ
       </Link>
     </nav>
   );

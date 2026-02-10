@@ -4,11 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCountdown } from "@/hooks/useCountdown";
 import { LAUNCH_DATE } from "@/lib/constants";
+import { padTwo } from "@/lib/format";
 
 const tabs = [
   { href: "/exhibition", label: "THE ART OF LIGHT" },
-  { href: "/gallery", label: "INDEX" },
-  { href: "/master", label: "MASTER JDZ" },
+  { href: "/gallery", label: "OVERVIEW" },
+  { href: "/master", label: "MASTER PHOTOGRAPHER JDZ" },
 ];
 
 export default function Navigation() {
@@ -16,12 +17,11 @@ export default function Navigation() {
     useCountdown(LAUNCH_DATE);
   const pathname = usePathname();
 
-  const pad = (n: number) => String(n).padStart(2, "0");
   const countdown = isExpired
     ? "LIVE"
     : days > 0
-      ? `${days}D ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
-      : `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+      ? `${days}D ${padTwo(hours)}:${padTwo(minutes)}:${padTwo(seconds)}`
+      : `${padTwo(hours)}:${padTwo(minutes)}:${padTwo(seconds)}`;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 px-6 pt-5">

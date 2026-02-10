@@ -1,24 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
 import Image from "next/image";
+import { motion, useInView } from "framer-motion";
 import { photos } from "@/lib/photos";
 import type { Photo } from "@/lib/photos";
 import PhotoViewer from "@/components/gallery/PhotoViewer";
+import { useTypewriter } from "@/hooks/useTypewriter";
 
-/** Each photo's aspect ratio matching the design layout */
-const PHOTO_ASPECTS: string[] = [
-  "aspect-[4/3]",
-  "aspect-[4/3]",
-  "aspect-square",
-  "aspect-[3/4]",
-  "aspect-[3/4]",
-  "aspect-square",
-  "aspect-square",
-  "aspect-[4/3]",
-  "aspect-[3/4]",
-  "aspect-[3/4]",
+// Repeating aspect ratio pattern for visual variety
+const ASPECT_PATTERNS = [
+  ["aspect-[4/3]", "aspect-[3/4]", "aspect-square", "aspect-[3/4]", "aspect-[4/3]"],
+  ["aspect-square", "aspect-[4/3]", "aspect-[2/3]", "aspect-[4/3]", "aspect-square"],
 ];
+
+const COLUMNS = 5;
+
+function TypingTextSection() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(sectionRef, { once: true, amount: 0.5 });
+
+  const { displayText: line1, isComplete: line1Done } = useTypewriter(
+    "WHAT DO YOU THINK IT WAS SHOT ON?",
+    60,
+    isInView ? 0 : 999999
+  );
+  const { displayText: line2 } = useTypewriter(
+    "WAIT FOR THE FINAL REVEAL",
+    60,
+    line1Done ? 400 : 999999
+  );
+
+  return (
+    <section
+      ref={sectionRef}
+      className="py-24 flex flex-col items-center justify-center gap-3 px-8"
+    >
+      <p
+        className="uppercase text-center text-white flex items-center justify-center"
+        style={{
+          fontSize: "clamp(0.75rem, 1.49vw, 1.1rem)",
+          letterSpacing: "-0.02em",
+          minHeight: "1.5em",
+        }}
+      >
+        {line1}
+        {isInView && !line1Done && (
+          <span className="inline-block w-[0.5em] h-[0.7em] bg-white ml-[0.1em] animate-blink" />
+        )}
+      </p>
+      <p
+        className="uppercase text-center text-white flex items-center justify-center"
+        style={{
+          fontSize: "clamp(0.75rem, 1.49vw, 1.1rem)",
+          letterSpacing: "-0.02em",
+          minHeight: "1.5em",
+        }}
+      >
+        {line2}
+        {line1Done && (
+          <span className="inline-block w-[0.5em] h-[0.7em] bg-white ml-[0.1em] animate-blink" />
+        )}
+      </p>
+    </section>
+  );
+}
 
 function BackToTopButton() {
   return (
@@ -27,10 +73,10 @@ function BackToTopButton() {
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         className="flex flex-col items-center gap-6 cursor-pointer group"
       >
-        <div className="w-14 h-14 rounded-sm bg-zinc-800/80 flex items-center justify-center transition-colors group-hover:bg-white">
+        <div className="w-10 h-10 rounded-sm bg-white/10 flex items-center justify-center transition-colors group-hover:bg-white">
           <svg
-            width="36"
-            height="36"
+            width="24"
+            height="24"
             viewBox="0 0 24 24"
             fill="none"
             className="text-white group-hover:text-black transition-colors"
@@ -44,7 +90,7 @@ function BackToTopButton() {
             />
           </svg>
         </div>
-        <span className="text-md uppercase tracking-[0.2em] text-white font-light">
+        <span className="text-xs uppercase tracking-[0.2em] text-white font-light">
           BACK TO TOP
         </span>
       </button>
@@ -53,53 +99,81 @@ function BackToTopButton() {
 }
 
 export default function GalleryPage() {
-  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  const selectedPhoto: Photo | null =
+    selectedIndex !== null ? photos[selectedIndex] : null;
+
+  const handleNavigate = useCallback(
+    (direction: 1 | -1) => {
+      if (selectedIndex === null) return;
+      const nextIndex = selectedIndex + direction;
+      if (nextIndex < 0 || nextIndex >= photos.length) return;
+      setSelectedIndex(nextIndex);
+    },
+    [selectedIndex]
+  );
+
+  const handleClose = useCallback(() => {
+    setSelectedIndex(null);
+  }, []);
 
   return (
     <>
-      <section className="min-h-screen px-6 md:px-10 lg:px-12 pt-20 pb-16 flex items-start">
-        <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-x-4 gap-y-6 md:gap-x-5 md:gap-y-8 items-start">
-          {photos.map((photo, i) => (
-            <div
-              key={photo.id}
-              className="cursor-pointer group"
-              onClick={() => setSelectedPhoto(photo)}
-            >
-              <div
-                className={`relative ${PHOTO_ASPECTS[i]} overflow-hidden bg-zinc-900`}
+      <section className="min-h-screen px-4 md:px-6 lg:px-8 pt-24 pb-16">
+        <div className="w-full grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 items-start">
+          {photos.map((photo, i) => {
+            const rowIndex = Math.floor(i / COLUMNS);
+            const colIndex = i % COLUMNS;
+            const patternRow =
+              ASPECT_PATTERNS[rowIndex % ASPECT_PATTERNS.length];
+            const aspectClass = patternRow[colIndex] || "aspect-square";
+
+            return (
+              <motion.div
+                key={photo.id}
+                className="cursor-pointer group"
+                initial={{ opacity: 0, y: 100 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{
+                  delay: colIndex * 0.02,
+                  type: "spring",
+                  stiffness: 20,
+                  damping: 10,
+                }}
+                onClick={() => setSelectedIndex(i)}
               >
-                <Image
-                  src={photo.src}
-                  alt={photo.alt}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
-                />
-              </div>
-              <p className="mt-2 text-[10px] uppercase tracking-widest text-zinc-600 group-hover:text-zinc-400 transition-colors">
-                {photo.id}
-              </p>
-            </div>
-          ))}
+                <div
+                  className={`relative ${aspectClass} overflow-hidden bg-zinc-900 border border-white/8`}
+                  style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.4)" }}
+                >
+                  <Image
+                    src={photo.src}
+                    alt={photo.alt}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 768px) 50vw, 20vw"
+                  />
+                </div>
+                <p className="mt-2 text-[11px] uppercase tracking-[0.07em] text-[#52525d] group-hover:text-zinc-400 transition-colors">
+                  {photo.id}
+                </p>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
-      <section className="py-32 flex flex-col items-center justify-center gap-4 px-8">
-        <p className="text-sm md:text-base uppercase tracking-[0.3em] text-center">
-          WHAT DO YOU THINK IT WAS SHOT ON?
-          <span className="inline-block w-2.5 h-4 bg-white ml-2 align-middle animate-pulse" />
-        </p>
-        <p className="text-sm md:text-base uppercase tracking-[0.3em] text-center">
-          WAIT FOR THE FINAL REVEAL
-          <span className="inline-block w-2.5 h-4 bg-white ml-2 align-middle animate-pulse" />
-        </p>
-      </section>
+      {/* Text Section */}
+      <TypingTextSection />
 
       <BackToTopButton />
 
       <PhotoViewer
         photo={selectedPhoto}
-        onClose={() => setSelectedPhoto(null)}
+        onClose={handleClose}
+        onNavigate={handleNavigate}
       />
     </>
   );

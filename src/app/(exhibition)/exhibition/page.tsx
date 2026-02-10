@@ -8,10 +8,8 @@ import PhotoViewer from "@/components/gallery/PhotoViewer";
 import { padTwo } from "@/lib/format";
 
 /** Layout: photos arranged diagonally bottom-left → top-right */
-const CARD_W = "clamp(280px, 32vw, 520px)";
-const CARD_H = "clamp(350px, 40vw, 650px)";
-const DIAGONAL_X_STEP = 16; // vw between each photo horizontally
-const DIAGONAL_Y_STEP = -11; // vw between each photo vertically (negative = up)
+const DIAGONAL_X_STEP = 8; // vw between each photo horizontally (tighter)
+const DIAGONAL_Y_STEP = -5.5; // vw between each photo vertically (negative = up)
 const PHOTO_ROTATE_Y = -18;
 const EDGE_THICKNESS = 5;
 const SCROLL_SENSITIVITY = 0.6;
@@ -19,11 +17,20 @@ const LERP_FACTOR = 0.07;
 const X_OFFSET = 5; // vw — initial horizontal offset
 const Y_OFFSET = 32; // vw — initial vertical offset (centers in viewport)
 
+/** Repeating aspect ratio patterns for visual variety */
+const CARD_SIZES: [string, string][] = [
+  ["clamp(280px, 32vw, 520px)", "clamp(200px, 22vw, 370px)"],  // landscape
+  ["clamp(220px, 25vw, 400px)", "clamp(300px, 35vw, 560px)"],  // portrait
+  ["clamp(260px, 30vw, 480px)", "clamp(260px, 30vw, 480px)"],  // square
+  ["clamp(300px, 34vw, 540px)", "clamp(220px, 24vw, 390px)"],  // wide landscape
+  ["clamp(200px, 23vw, 380px)", "clamp(280px, 32vw, 520px)"],  // tall portrait
+  ["clamp(270px, 31vw, 500px)", "clamp(200px, 23vw, 380px)"],  // landscape
+];
+
 /** Calculate the scroll progress needed to center a photo by index */
 function getProgressForIndex(index: number): number {
-  // Center the photo in the viewport (~50vw - half card width ~16vw = ~34vw)
   const targetX = index * DIAGONAL_X_STEP + X_OFFSET;
-  const centerOffset = 34; // vw to center a 32vw card
+  const centerOffset = 20; // vw to center in viewport
   return Math.max(0, targetX - centerOffset);
 }
 
@@ -141,6 +148,7 @@ export default function ExhibitionPage() {
           {photos.map((photo, i) => {
             const x = i * DIAGONAL_X_STEP + X_OFFSET;
             const y = i * DIAGONAL_Y_STEP + Y_OFFSET;
+            const [cardW, cardH] = CARD_SIZES[i % CARD_SIZES.length];
 
             return (
               <div
@@ -149,8 +157,8 @@ export default function ExhibitionPage() {
                 style={{
                   left: `${x}vw`,
                   top: `${y}vw`,
-                  width: CARD_W,
-                  height: CARD_H,
+                  width: cardW,
+                  height: cardH,
                   transformStyle: "preserve-3d",
                   transform: `rotateY(${PHOTO_ROTATE_Y}deg)`,
                 }}

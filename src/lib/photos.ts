@@ -1,25 +1,20 @@
-import { PHOTOS } from "./constants";
-
 export interface Photo {
   id: string;
   src: string;
   alt: string;
 }
 
-/**
- * Maps photo index to actual file path.
- * Photos 7-10 fall back to photos 1-4 (placeholder mapping).
- */
-const FALLBACK_THRESHOLD = 6;
+const AVAILABLE_IMAGES = 6;
 
 export function getPhotoSrc(index: number): string {
-  if (index >= FALLBACK_THRESHOLD) {
-    return `/images/photo${index - FALLBACK_THRESHOLD + 1}.jpg`;
-  }
-  return `/images/photo${index + 1}.jpg`;
+  const imageIndex = (index % AVAILABLE_IMAGES) + 1;
+  return `/images/photo${imageIndex}.jpg`;
 }
 
-export const photos: Photo[] = PHOTOS.map((p, i) => ({
-  ...p,
+const TOTAL_PHOTOS = 50;
+
+export const photos: Photo[] = Array.from({ length: TOTAL_PHOTOS }, (_, i) => ({
+  id: `JDZ-${String(i + 1).padStart(2, "0")}`,
   src: getPhotoSrc(i),
+  alt: `JDZ CHUNG - Photo ${i + 1}`,
 }));

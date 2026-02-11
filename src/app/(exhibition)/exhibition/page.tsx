@@ -17,15 +17,27 @@ const LERP_FACTOR = 0.07;
 const X_OFFSET = 5; // vw — initial horizontal offset
 const Y_OFFSET = 32; // vw — initial vertical offset (centers in viewport)
 
-/** Repeating aspect ratio patterns for visual variety */
-const CARD_SIZES: [string, string][] = [
-  ["clamp(280px, 32vw, 520px)", "clamp(200px, 22vw, 370px)"],  // landscape
-  ["clamp(220px, 25vw, 400px)", "clamp(300px, 35vw, 560px)"],  // portrait
-  ["clamp(260px, 30vw, 480px)", "clamp(260px, 30vw, 480px)"],  // square
-  ["clamp(300px, 34vw, 540px)", "clamp(220px, 24vw, 390px)"],  // wide landscape
-  ["clamp(200px, 23vw, 380px)", "clamp(280px, 32vw, 520px)"],  // tall portrait
-  ["clamp(270px, 31vw, 500px)", "clamp(200px, 23vw, 380px)"],  // landscape
-];
+/** Base size for the longer side of each card */
+const CARD_BASE_VW = 28;
+
+/** Calculate card dimensions from actual image aspect ratio */
+function getCardSize(w: number, h: number): { width: string; height: string } {
+  const ratio = w / h;
+  if (ratio >= 1) {
+    // landscape or square
+    const hVw = CARD_BASE_VW / ratio;
+    return {
+      width: `${CARD_BASE_VW}vw`,
+      height: `${hVw}vw`,
+    };
+  }
+  // portrait
+  const wVw = CARD_BASE_VW * ratio;
+  return {
+    width: `${wVw}vw`,
+    height: `${CARD_BASE_VW}vw`,
+  };
+}
 
 /** Calculate the scroll progress needed to center a photo by index */
 function getProgressForIndex(index: number): number {
@@ -148,7 +160,7 @@ export default function ExhibitionPage() {
           {photos.map((photo, i) => {
             const x = i * DIAGONAL_X_STEP + X_OFFSET;
             const y = i * DIAGONAL_Y_STEP + Y_OFFSET;
-            const [cardW, cardH] = CARD_SIZES[i % CARD_SIZES.length];
+            const { width: cardW, height: cardH } = getCardSize(photo.width, photo.height);
 
             return (
               <div

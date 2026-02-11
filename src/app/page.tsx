@@ -37,7 +37,7 @@ export default function LoadingPage() {
   // Typewriter only starts when phase is "text"
   const { displayText, isComplete } = useTypewriter(
     "THE ART OF LIGHT",
-    80,
+    120,
     phase === "text" ? 0 : 999999
   );
 
@@ -72,12 +72,35 @@ export default function LoadingPage() {
           <motion.div
             key="star"
             initial={{ clipPath: "inset(100% 0 0 0)", opacity: 0, scale: 0.8 }}
-            animate={{ clipPath: "inset(0% 0 0 0)", opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.5 } }}
-            transition={{ duration: 3, ease: "easeOut" }}
+            animate={{
+              clipPath: [
+                "inset(100% 0 0 0)", // start
+                "inset(34% 0 0 0)",  // 66% filled — smooth
+                "inset(34% 0 0 0)",  // pause
+                "inset(20% 0 0 0)",  // 80% filled
+                "inset(20% 0 0 0)",  // pause
+                "inset(5% 0 0 0)",   // 95% filled
+                "inset(0% 0 0 0)",   // 100% — slow finish
+              ],
+              opacity: [0, 1, 1, 1, 1, 1, 1],
+              scale: [0.8, 1, 1, 1, 1, 1, 1],
+            }}
+            exit={{ opacity: 0, transition: { duration: 0 } }}
+            transition={{
+              duration: 7,
+              times: [0, 0.35, 0.42, 0.58, 0.65, 0.82, 1],
+              ease: [
+                [0.2, 0, 0.1, 1.15],   // 0→66%: 쓰윽 차다가 살짝 오버슛
+                [0.7, 0, 0.3, 1],       // 66% 멈칫: 쫀득하게 멈춤
+                [0.8, -0.1, 0.2, 1.1],  // 멈춤→80%: 달라붙었다 떨어지는 느낌
+                [0.7, 0, 0.3, 1],       // 80% 멈칫: 쫀득하게 멈춤
+                [0.75, -0.05, 0.15, 1], // 멈춤→95%: 스티키하게 출발
+                [0.4, 0, 0.05, 1],      // 95→100%: 아주 천천히 마무리
+              ],
+            }}
             onAnimationComplete={() => {
               if (phase === "star") {
-                setTimeout(() => setPhase("text"), 500);
+                setPhase("text");
               }
             }}
             className="relative"
@@ -96,10 +119,9 @@ export default function LoadingPage() {
         {phase === "text" && (
           <motion.div
             key="text"
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 1 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
             className="flex flex-col items-center"
           >
             {/* Title: IBM Plex Sans Condensed Regular, 1.49vw proportional */}

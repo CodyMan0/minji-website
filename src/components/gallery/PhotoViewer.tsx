@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Photo } from "@/lib/photos";
 
 interface PhotoViewerProps {
@@ -12,6 +12,7 @@ interface PhotoViewerProps {
 }
 
 const WHEEL_COOLDOWN_MS = 400;
+const SLIDE_OFFSET = "100vw";
 
 export default function PhotoViewer({
   photo,
@@ -19,17 +20,25 @@ export default function PhotoViewer({
   onNavigate,
 }: PhotoViewerProps) {
   const wheelCooldown = useRef(false);
+  const [direction, setDirection] = useState<1 | -1>(1);
+
+  const navigateWithDirection = useCallback(
+    (dir: 1 | -1) => {
+      setDirection(dir);
+      onNavigate?.(dir);
+    },
+    [onNavigate]
+  );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowRight" || e.key === "ArrowDown") onNavigate?.(1);
-      if (e.key === "ArrowLeft" || e.key === "ArrowUp") onNavigate?.(-1);
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") navigateWithDirection(1);
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") navigateWithDirection(-1);
     },
-    [onClose, onNavigate]
+    [onClose, navigateWithDirection]
   );
 
-  // Wheel navigation with cooldown
   const handleWheel = useCallback(
     (e: WheelEvent) => {
       e.preventDefault();
@@ -39,15 +48,15 @@ export default function PhotoViewer({
         Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
       if (Math.abs(delta) < 10) return;
 
-      const direction = delta > 0 ? 1 : -1;
-      onNavigate(direction);
+      const dir = delta > 0 ? 1 : -1;
+      navigateWithDirection(dir);
 
       wheelCooldown.current = true;
       setTimeout(() => {
         wheelCooldown.current = false;
       }, WHEEL_COOLDOWN_MS);
     },
-    [onNavigate]
+    [onNavigate, navigateWithDirection]
   );
 
   useEffect(() => {
@@ -64,40 +73,57 @@ export default function PhotoViewer({
     };
   }, [photo, handleKeyDown, handleWheel]);
 
+  const isOpen = photo !== null;
+
   return (
-    <AnimatePresence mode="wait">
-      {photo && (
-        <motion.div
-          key={photo.id}
-          className="fixed inset-0 z-60 flex items-center justify-center bg-black/90 cursor-pointer"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          onClick={onClose}
-        >
+    <>
+      {/* Backdrop — persists while any photo is open, no flicker */}
+      <AnimatePresence>
+        {isOpen && (
           <motion.div
-            className="relative max-w-4xl w-full mx-8 aspect-3/2 cursor-default"
-            initial={{ opacity: 0, x: 60 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -60 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            onClick={(e) => e.stopPropagation()}
+            key="backdrop"
+            className="fixed inset-0 z-60 bg-black/90 cursor-pointer"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Photo — slides directionally, backdrop stays */}
+      <AnimatePresence mode="popLayout" custom={direction}>
+        {photo && (
+          <motion.div
+            key={photo.id}
+            custom={direction}
+            className="fixed inset-0 z-60 flex items-center justify-center pointer-events-none"
+            initial={{ x: direction === 1 ? SLIDE_OFFSET : `-${SLIDE_OFFSET}`, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: direction === 1 ? `-${SLIDE_OFFSET}` : SLIDE_OFFSET, opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            <Image
-              src={photo.src}
-              alt={photo.alt}
-              fill
-              className="object-contain"
-              sizes="(max-width: 896px) 100vw, 896px"
-              priority
-            />
-            <p className="absolute -bottom-10 left-0 text-xs uppercase tracking-widest text-zinc-500">
-              {photo.id}
-            </p>
+            <div
+              className="flex flex-col items-center cursor-default pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                width={photo.width}
+                height={photo.height}
+                className="max-h-[80vh] max-w-[90vw] w-auto h-auto"
+                sizes="(max-width: 896px) 90vw, 56rem"
+                priority
+              />
+              <p className="mt-3 text-xs uppercase tracking-widest text-zinc-500">
+                {photo.id}
+              </p>
+            </div>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

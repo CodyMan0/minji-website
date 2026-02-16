@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Photo } from "@/lib/photos";
 
@@ -14,6 +14,40 @@ interface PhotoViewerProps {
 const WHEEL_COOLDOWN_MS = 600;
 const SLIDE_OFFSET = "60vw";
 
+/** Match the card's 3D rotation for open/close transition */
+const CARD_ROTATE_X = -10;
+const CARD_ROTATE_Y = -18;
+const CARD_ROTATE_Z = 2;
+
+/** Slide variants using custom direction for correct exit direction */
+const slideVariants: Variants = {
+  enter: (dir: 1 | -1) => ({
+    x: dir === 1 ? SLIDE_OFFSET : `-${SLIDE_OFFSET}`,
+  }),
+  center: { x: 0 },
+  exit: (dir: 1 | -1) => ({
+    x: dir === 1 ? `-${SLIDE_OFFSET}` : SLIDE_OFFSET,
+  }),
+};
+
+const scaleVariants: Variants = {
+  enter: {
+    scale: 0.5,
+    opacity: 0,
+    rotateX: CARD_ROTATE_X,
+    rotateY: CARD_ROTATE_Y,
+    rotateZ: CARD_ROTATE_Z,
+  },
+  center: { scale: 1, opacity: 1, rotateX: 0, rotateY: 0, rotateZ: 0 },
+  exit: {
+    scale: 0.5,
+    opacity: 0,
+    rotateX: CARD_ROTATE_X,
+    rotateY: CARD_ROTATE_Y,
+    rotateZ: CARD_ROTATE_Z,
+  },
+};
+
 export default function PhotoViewer({
   photo,
   onClose,
@@ -21,22 +55,26 @@ export default function PhotoViewer({
 }: PhotoViewerProps) {
   const wheelCooldown = useRef(false);
   const [direction, setDirection] = useState<1 | -1>(1);
+  const isNavigating = useRef(false);
 
   const navigateWithDirection = useCallback(
     (dir: 1 | -1) => {
+      isNavigating.current = true;
       setDirection(dir);
       onNavigate?.(dir);
     },
-    [onNavigate]
+    [onNavigate],
   );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowRight" || e.key === "ArrowDown") navigateWithDirection(1);
-      if (e.key === "ArrowLeft" || e.key === "ArrowUp") navigateWithDirection(-1);
+      if (e.key === "ArrowRight" || e.key === "ArrowDown")
+        navigateWithDirection(1);
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp")
+        navigateWithDirection(-1);
     },
-    [onClose, navigateWithDirection]
+    [onClose, navigateWithDirection],
   );
 
   const handleWheel = useCallback(
@@ -56,8 +94,15 @@ export default function PhotoViewer({
         wheelCooldown.current = false;
       }, WHEEL_COOLDOWN_MS);
     },
-    [onNavigate, navigateWithDirection]
+    [onNavigate, navigateWithDirection],
   );
+
+  // Reset isNavigating when viewer closes
+  useEffect(() => {
+    if (!photo) {
+      isNavigating.current = false;
+    }
+  }, [photo]);
 
   useEffect(() => {
     if (!photo) return;
@@ -74,10 +119,12 @@ export default function PhotoViewer({
   }, [photo, handleKeyDown, handleWheel]);
 
   const isOpen = photo !== null;
+  const useSlide = isNavigating.current;
+  const variants = useSlide ? slideVariants : scaleVariants;
 
   return (
     <>
-      {/* Backdrop — persists while any photo is open, no flicker */}
+      {/* Backdrop */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -92,17 +139,22 @@ export default function PhotoViewer({
         )}
       </AnimatePresence>
 
-      {/* Photo — slides directionally, backdrop stays */}
+      {/* Photo — custom direction ensures correct exit direction */}
       <AnimatePresence mode="popLayout" custom={direction}>
         {photo && (
           <motion.div
             key={photo.id}
             custom={direction}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
             className="fixed inset-0 z-60 flex items-center justify-center pointer-events-none"
-            initial={{ x: direction === 1 ? SLIDE_OFFSET : `-${SLIDE_OFFSET}`, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: direction === 1 ? `-${SLIDE_OFFSET}` : SLIDE_OFFSET, opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={
+              useSlide
+                ? { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                : { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
+            }
           >
             <div
               className="flex flex-col items-center cursor-default pointer-events-auto"

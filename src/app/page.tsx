@@ -8,23 +8,23 @@ import { useTypewriter } from "@/hooks/useTypewriter";
 
 type Phase = "star" | "text" | "done";
 
+/** Star reveal total duration in seconds */
+const STAR_REVEAL_DURATION = 3.5;
+
 export default function LoadingPage() {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("star");
   const [shouldSkip, setShouldSkip] = useState(false);
-
   // Check if loading should be shown (only on refresh or direct / navigation)
   useEffect(() => {
     const navEntries = performance.getEntriesByType(
-      "navigation"
+      "navigation",
     ) as PerformanceNavigationTiming[];
     const navType = navEntries[0]?.type;
 
-    // Show loading only on direct navigation or reload (not back/forward)
     const isDirectOrRefresh =
       navType === "navigate" || navType === "reload" || !navType;
 
-    // Check sessionStorage for in-app navigation
     const hasSeenLoading = sessionStorage.getItem("loading-seen");
 
     if (!isDirectOrRefresh && hasSeenLoading) {
@@ -38,8 +38,13 @@ export default function LoadingPage() {
   const { displayText, isComplete } = useTypewriter(
     "THE ART OF LIGHT",
     120,
-    phase === "text" ? 0 : 999999
+    phase === "text" ? 0 : 999999,
   );
+
+  // Star reveal complete → immediately transition to text
+  const handleStarComplete = () => {
+    if (phase === "star") setPhase("text");
+  };
 
   // When typewriter completes, show collaboration text then navigate
   useEffect(() => {
@@ -59,7 +64,6 @@ export default function LoadingPage() {
     }
   }, [phase, router]);
 
-  // Skip rendering if redirecting
   if (shouldSkip) {
     return <div className="min-h-screen bg-black" />;
   }
@@ -67,43 +71,30 @@ export default function LoadingPage() {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center overflow-hidden">
       <AnimatePresence mode="wait">
-        {/* Phase: Star/Light Reveal */}
+        {/* Phase 1: Star — bottom-to-top clipPath reveal (matches loading page.mp4) */}
         {phase === "star" && (
           <motion.div
             key="star"
-            initial={{ clipPath: "inset(100% 0 0 0)", opacity: 0, scale: 0.8 }}
+            className="relative"
+            initial={{ clipPath: "inset(100% 0 0 0)", opacity: 0 }}
             animate={{
               clipPath: [
-                "inset(100% 0 0 0)", // start
-                "inset(34% 0 0 0)",  // 66% filled — smooth
-                "inset(34% 0 0 0)",  // pause
-                "inset(20% 0 0 0)",  // 80% filled
-                "inset(20% 0 0 0)",  // pause
-                "inset(5% 0 0 0)",   // 95% filled
-                "inset(0% 0 0 0)",   // 100% — slow finish
+                "inset(100% 0 0 0)", // start: hidden
+                "inset(45% 0 0 0)", // 55% revealed — fast
+                "inset(45% 0 0 0)", // pause at 55%
+                "inset(30% 0 0 0)", // 70% revealed — fast
+                "inset(30% 0 0 0)", // pause at 70%
+                "inset(10% 0 0 0)", // 100% revealed — snap
+                "inset(10% 0 0 0)", // hold at 100%
               ],
               opacity: [0, 1, 1, 1, 1, 1, 1],
-              scale: [0.8, 1, 1, 1, 1, 1, 1],
             }}
-            exit={{ opacity: 0, transition: { duration: 0 } }}
+            exit={{ opacity: 0, transition: { duration: 0.4, ease: "easeIn" } }}
             transition={{
-              duration: 7,
-              times: [0, 0.35, 0.42, 0.58, 0.65, 0.82, 1],
-              ease: [
-                [0.2, 0, 0.1, 1.15],   // 0→66%: 쓰윽 차다가 살짝 오버슛
-                [0.7, 0, 0.3, 1],       // 66% 멈칫: 쫀득하게 멈춤
-                [0.8, -0.1, 0.2, 1.1],  // 멈춤→80%: 달라붙었다 떨어지는 느낌
-                [0.7, 0, 0.3, 1],       // 80% 멈칫: 쫀득하게 멈춤
-                [0.75, -0.05, 0.15, 1], // 멈춤→95%: 스티키하게 출발
-                [0.4, 0, 0.05, 1],      // 95→100%: 아주 천천히 마무리
-              ],
+              duration: STAR_REVEAL_DURATION,
+              times: [0, 0.25, 0.42, 0.57, 0.75, 0.82, 1],
             }}
-            onAnimationComplete={() => {
-              if (phase === "star") {
-                setPhase("text");
-              }
-            }}
-            className="relative"
+            onAnimationComplete={handleStarComplete}
           >
             <Image
               src="/light-loading.svg"
@@ -115,16 +106,16 @@ export default function LoadingPage() {
           </motion.div>
         )}
 
-        {/* Phase: Text content — matches Figma node 62:225 */}
+        {/* Phase 2: Text content */}
         {phase === "text" && (
           <motion.div
             key="text"
-            initial={{ opacity: 1 }}
+            initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 0, transition: { duration: 0.5 } }}
+            transition={{ duration: 0.3 }}
             className="flex flex-col items-center"
           >
-            {/* Title: IBM Plex Sans Condensed Regular, 1.49vw proportional */}
             <h1
               className="font-normal text-white uppercase flex items-center leading-[1.54]"
               style={{
@@ -139,20 +130,19 @@ export default function LoadingPage() {
               />
             </h1>
 
-            {/* Subtitle: 0.96vw proportional, 64% opacity */}
             {isComplete && (
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.64 }}
                 transition={{ duration: 1 }}
-                className="text-white uppercase mt-1"
+                className="text-white uppercase"
                 style={{
                   fontSize: "clamp(0.75rem, 0.96vw, 1.25rem)",
                   letterSpacing: "-0.02em",
                   lineHeight: "1.24",
                 }}
               >
-                XIAOMI KOREA  X  JDZ CHUNG
+                XIAOMI KOREA &nbsp; X &nbsp; JDZ CHUNG
               </motion.p>
             )}
           </motion.div>

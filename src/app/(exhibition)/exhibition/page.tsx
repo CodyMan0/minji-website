@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, useSyncExternalStore } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useSyncExternalStore,
+} from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { photos } from "@/lib/photos";
 import type { Photo } from "@/lib/photos";
 import PhotoViewer from "@/components/gallery/PhotoViewer";
@@ -11,54 +16,55 @@ import { padTwo } from "@/lib/format";
 /** Layout: photos arranged diagonally bottom-left → top-right */
 const DIAGONAL_X_STEP = 8;
 const DIAGONAL_Y_STEP = -5.5;
+const PHOTO_ROTATE_X = -10;
 const PHOTO_ROTATE_Y = -18;
-const EDGE_THICKNESS = 5;
+const PHOTO_ROTATE_Z = 2;
+const EDGE_THICKNESS = 10;
 const SCROLL_SENSITIVITY = 0.6;
-const LERP_FACTOR = 0.07;
+const LERP_FACTOR_MIN = 0.04;
+const LERP_FACTOR_MAX = 0.15;
 const X_OFFSET = 5;
 const Y_OFFSET = 32;
 
 /** Base size for the longer side of each card */
 const CARD_BASE_VW = 28;
 
+/** Entrance: gallery starts at photo 1, overshoots center, then bounces back */
+const ENTRANCE_TARGET = 25;
+const ENTRANCE_OVERSHOOT = 2;
+
 /** Calculate card dimensions from actual image aspect ratio */
 function getCardSize(w: number, h: number): { width: string; height: string } {
   const ratio = w / h;
   if (ratio >= 1) {
-    // landscape or square
     const hVw = CARD_BASE_VW / ratio;
-    return {
-      width: `${CARD_BASE_VW}vw`,
-      height: `${hVw}vw`,
-    };
+    return { width: `${CARD_BASE_VW}vw`, height: `${hVw}vw` };
   }
-  // portrait
   const wVw = CARD_BASE_VW * ratio;
-  return {
-    width: `${wVw}vw`,
-    height: `${CARD_BASE_VW}vw`,
-  };
+  return { width: `${wVw}vw`, height: `${CARD_BASE_VW}vw` };
 }
 
 /** Calculate the scroll progress needed to center a photo by index */
 function getProgressForIndex(index: number): number {
   const targetX = index * DIAGONAL_X_STEP + X_OFFSET;
-  const centerOffset = 20; // vw to center in viewport
+  const centerOffset = 20;
   return Math.max(0, targetX - centerOffset);
 }
 
 export default function ExhibitionPage() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
-  const targetProgress = useRef(0);
+  const targetProgress = useRef(ENTRANCE_TARGET + ENTRANCE_OVERSHOOT);
+  const hasBounced = useRef(false);
 
-  // SSR-safe mounted check without setState in useEffect
+  // SSR-safe mounted check
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
-    () => false
+    () => false,
   );
 
   const maxProgress = (photos.length - 3) * DIAGONAL_X_STEP;
@@ -66,13 +72,28 @@ export default function ExhibitionPage() {
   const selectedPhoto: Photo | null =
     selectedIndex !== null ? photos[selectedIndex] : null;
 
-  // Smooth diagonal scroll with lerp
+  // Smooth diagonal scroll with lerp + entrance bounce
   useEffect(() => {
     const animate = () => {
       setScrollProgress((prev) => {
         const diff = targetProgress.current - prev;
+
+        // Entrance bounce: overshoot then bounce back behind target
+        if (
+          !hasBounced.current &&
+          prev >= ENTRANCE_TARGET &&
+          targetProgress.current === ENTRANCE_TARGET + ENTRANCE_OVERSHOOT
+        ) {
+          hasBounced.current = true;
+          targetProgress.current = ENTRANCE_TARGET - ENTRANCE_OVERSHOOT;
+        }
+
         if (Math.abs(diff) < 0.01) return targetProgress.current;
-        return prev + diff * LERP_FACTOR;
+        // Fast when far, chewy/sticky when close
+        const t = Math.min(Math.abs(diff) / 20, 1);
+        const factor =
+          LERP_FACTOR_MIN + t * (LERP_FACTOR_MAX - LERP_FACTOR_MIN);
+        return prev + diff * factor;
       });
       animationRef.current = requestAnimationFrame(animate);
     };
@@ -97,7 +118,7 @@ export default function ExhibitionPage() {
       const deltaVw = delta / vw;
       targetProgress.current = Math.max(
         0,
-        Math.min(maxProgress, targetProgress.current + deltaVw)
+        Math.min(maxProgress, targetProgress.current + deltaVw),
       );
     };
 
@@ -105,36 +126,31 @@ export default function ExhibitionPage() {
     return () => el.removeEventListener("wheel", handleWheel);
   }, [maxProgress, selectedIndex]);
 
-  // When a photo is selected, scroll background to center it
   const scrollToPhoto = useCallback(
     (index: number) => {
       const progress = getProgressForIndex(index);
       targetProgress.current = Math.min(progress, maxProgress);
     },
-    [maxProgress]
+    [maxProgress],
   );
 
-  // Open viewer and center background on the photo
   const handlePhotoClick = useCallback(
     (index: number) => {
       setSelectedIndex(index);
       scrollToPhoto(index);
     },
-    [scrollToPhoto]
+    [scrollToPhoto],
   );
 
-  // Navigate between photos in the viewer
   const handleNavigate = useCallback(
     (direction: 1 | -1) => {
       if (selectedIndex === null) return;
-
       const nextIndex = selectedIndex + direction;
       if (nextIndex < 0 || nextIndex >= photos.length) return;
-
       setSelectedIndex(nextIndex);
       scrollToPhoto(nextIndex);
     },
-    [selectedIndex, scrollToPhoto]
+    [selectedIndex, scrollToPhoto],
   );
 
   const handleClose = useCallback(() => {
@@ -145,7 +161,7 @@ export default function ExhibitionPage() {
 
   const currentIndex = Math.min(
     Math.floor(scrollProgress / DIAGONAL_X_STEP),
-    photos.length - 1
+    photos.length - 1,
   );
 
   return (
@@ -156,28 +172,26 @@ export default function ExhibitionPage() {
         className="fixed inset-0 bg-black overflow-hidden"
         style={{ perspective: "1200px", zIndex: 1 }}
       >
-        {/* Diagonal photo strip — moves diagonally within fixed viewport */}
-        <motion.div
+        {/* Diagonal photo strip */}
+        <div
           className="absolute w-full h-full"
           style={{
             transformStyle: "preserve-3d",
             transform: `translate(${-scrollProgress}vw, ${-scrollProgress * yRatio}vw)`,
             willChange: "transform",
-          }}
-          initial={{ scale: 0.9, opacity: 0, y: 20 }}
-          animate={mounted ? { scale: 1, opacity: 1, y: 0 } : {}}
-          transition={{
-            duration: 1.5,
-            ease: [0.22, 1, 0.36, 1],
+            opacity: mounted ? 1 : 0,
           }}
         >
           {photos.map((photo, i) => {
             const x = i * DIAGONAL_X_STEP + X_OFFSET;
             const y = i * DIAGONAL_Y_STEP + Y_OFFSET;
-            const { width: cardW, height: cardH } = getCardSize(photo.width, photo.height);
+            const { width: cardW, height: cardH } = getCardSize(
+              photo.width,
+              photo.height,
+            );
 
             return (
-              <motion.div
+              <div
                 key={photo.id}
                 className="absolute cursor-pointer"
                 style={{
@@ -186,19 +200,28 @@ export default function ExhibitionPage() {
                   width: cardW,
                   height: cardH,
                   transformStyle: "preserve-3d",
-                  transform: `rotateY(${PHOTO_ROTATE_Y}deg)`,
+                  transform:
+                    hoveredIndex === i
+                      ? `rotateX(${PHOTO_ROTATE_X}deg) rotateY(${PHOTO_ROTATE_Y}deg) rotateZ(${PHOTO_ROTATE_Z}deg) translate(5vw, 1vw)`
+                      : `rotateX(${PHOTO_ROTATE_X}deg) rotateY(${PHOTO_ROTATE_Y}deg) rotateZ(${PHOTO_ROTATE_Z}deg) translate(0, 0)`,
+                  transition: "transform 0.25s ease-out",
                 }}
-                whileHover={{ scale: 1.03 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
                 onClick={() => handlePhotoClick(i)}
               >
                 {/* Front face */}
                 <div
-                  className="absolute inset-0 overflow-hidden bg-zinc-900 transition-all duration-300 hover:brightness-110"
+                  className="absolute inset-0 overflow-hidden bg-zinc-900"
                   style={{
                     backfaceVisibility: "hidden",
                     boxShadow:
-                      "0 25px 80px rgba(0,0,0,0.7), 0 10px 30px rgba(0,0,0,0.5)",
+                      hoveredIndex === i
+                        ? "0 35px 100px rgba(0,0,0,0.8), 0 15px 40px rgba(0,0,0,0.6)"
+                        : "0 25px 80px rgba(0,0,0,0.7), 0 10px 30px rgba(0,0,0,0.5)",
+                    filter:
+                      hoveredIndex === i ? "brightness(1.1)" : "brightness(1)",
+                    transition: "filter 0.3s ease, box-shadow 0.4s ease",
                   }}
                 >
                   <Image
@@ -236,12 +259,12 @@ export default function ExhibitionPage() {
                     background: "linear-gradient(to bottom, #999, #444)",
                   }}
                 />
-              </motion.div>
+              </div>
             );
           })}
-        </motion.div>
+        </div>
 
-        {/* Card counter — fixed in viewport */}
+        {/* Card counter */}
         <div className="fixed bottom-4 right-8 z-50 text-[10px] uppercase tracking-widest text-zinc-600 font-light">
           {padTwo(currentIndex + 1)} / {padTwo(photos.length)}
         </div>

@@ -1,21 +1,22 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useSyncExternalStore } from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { photos } from "@/lib/photos";
 import type { Photo } from "@/lib/photos";
 import PhotoViewer from "@/components/gallery/PhotoViewer";
 import { padTwo } from "@/lib/format";
 
 /** Layout: photos arranged diagonally bottom-left → top-right */
-const DIAGONAL_X_STEP = 8; // vw between each photo horizontally (tighter)
-const DIAGONAL_Y_STEP = -5.5; // vw between each photo vertically (negative = up)
+const DIAGONAL_X_STEP = 8;
+const DIAGONAL_Y_STEP = -5.5;
 const PHOTO_ROTATE_Y = -18;
 const EDGE_THICKNESS = 5;
 const SCROLL_SENSITIVITY = 0.6;
 const LERP_FACTOR = 0.07;
-const X_OFFSET = 5; // vw — initial horizontal offset
-const Y_OFFSET = 32; // vw — initial vertical offset (centers in viewport)
+const X_OFFSET = 5;
+const Y_OFFSET = 32;
 
 /** Base size for the longer side of each card */
 const CARD_BASE_VW = 28;
@@ -53,27 +54,34 @@ export default function ExhibitionPage() {
   const animationRef = useRef<number | null>(null);
   const targetProgress = useRef(0);
 
+  // SSR-safe mounted check without setState in useEffect
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+
   const maxProgress = (photos.length - 3) * DIAGONAL_X_STEP;
 
   const selectedPhoto: Photo | null =
     selectedIndex !== null ? photos[selectedIndex] : null;
 
   // Smooth diagonal scroll with lerp
-  const animate = useCallback(() => {
-    setScrollProgress((prev) => {
-      const diff = targetProgress.current - prev;
-      if (Math.abs(diff) < 0.01) return targetProgress.current;
-      return prev + diff * LERP_FACTOR;
-    });
-    animationRef.current = requestAnimationFrame(animate);
-  }, []);
-
   useEffect(() => {
+    const animate = () => {
+      setScrollProgress((prev) => {
+        const diff = targetProgress.current - prev;
+        if (Math.abs(diff) < 0.01) return targetProgress.current;
+        return prev + diff * LERP_FACTOR;
+      });
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
     animationRef.current = requestAnimationFrame(animate);
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [animate]);
+  }, []);
 
   // Wheel: scroll along the diagonal axis (only when viewer is closed)
   useEffect(() => {
@@ -149,12 +157,18 @@ export default function ExhibitionPage() {
         style={{ perspective: "1200px", zIndex: 1 }}
       >
         {/* Diagonal photo strip — moves diagonally within fixed viewport */}
-        <div
+        <motion.div
           className="absolute w-full h-full"
           style={{
             transformStyle: "preserve-3d",
             transform: `translate(${-scrollProgress}vw, ${-scrollProgress * yRatio}vw)`,
             willChange: "transform",
+          }}
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          animate={mounted ? { scale: 1, opacity: 1, y: 0 } : {}}
+          transition={{
+            duration: 1.5,
+            ease: [0.22, 1, 0.36, 1],
           }}
         >
           {photos.map((photo, i) => {
@@ -163,7 +177,7 @@ export default function ExhibitionPage() {
             const { width: cardW, height: cardH } = getCardSize(photo.width, photo.height);
 
             return (
-              <div
+              <motion.div
                 key={photo.id}
                 className="absolute cursor-pointer"
                 style={{
@@ -174,11 +188,13 @@ export default function ExhibitionPage() {
                   transformStyle: "preserve-3d",
                   transform: `rotateY(${PHOTO_ROTATE_Y}deg)`,
                 }}
+                whileHover={{ scale: 1.03 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 onClick={() => handlePhotoClick(i)}
               >
                 {/* Front face */}
                 <div
-                  className="absolute inset-0 overflow-hidden bg-zinc-900"
+                  className="absolute inset-0 overflow-hidden bg-zinc-900 transition-all duration-300 hover:brightness-110"
                   style={{
                     backfaceVisibility: "hidden",
                     boxShadow:
@@ -220,10 +236,10 @@ export default function ExhibitionPage() {
                     background: "linear-gradient(to bottom, #999, #444)",
                   }}
                 />
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
 
         {/* Card counter — fixed in viewport */}
         <div className="fixed bottom-4 right-8 z-50 text-[10px] uppercase tracking-widest text-zinc-600 font-light">

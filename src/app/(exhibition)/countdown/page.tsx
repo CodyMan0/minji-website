@@ -13,7 +13,7 @@ export default function CountdownPage() {
   const totalHours = days * 24 + hours;
   const display = `${padTwo(totalHours)}:${padTwo(minutes)}:${padTwo(seconds)} (KST)`;
 
-  const { displayText: revealText } = useTypewriter(
+  const { displayText: revealText, isComplete } = useTypewriter(
     "GET READY FOR THE REVEAL",
     60,
     500
@@ -28,12 +28,16 @@ export default function CountdownPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] flex flex-col items-center justify-center gap-2">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="min-h-[calc(100vh-5rem)] flex flex-col items-center justify-center gap-2"
+    >
       {/* Question text — static */}
       <p
         className="text-white uppercase"
         style={{
-          fontFamily: "'IBM Plex Sans Condensed', sans-serif",
           fontSize: "clamp(0.75rem, 1.13vw, 1.1rem)",
           lineHeight: 1.54,
           letterSpacing: "-0.02em",
@@ -42,14 +46,14 @@ export default function CountdownPage() {
         WHAT DO YOU THINK IT WAS SHOT ON?
       </p>
 
-      {/* Large countdown timer */}
+      {/* Large countdown timer with glow */}
       <h1
         className="font-normal text-white uppercase tabular-nums"
         style={{
-          fontFamily: "'IBM Plex Sans Condensed', sans-serif",
           fontSize: "clamp(3rem, 5.1vw, 5rem)",
           lineHeight: 1.54,
           letterSpacing: "-0.02em",
+          textShadow: "0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.15)",
         }}
       >
         {display}
@@ -59,7 +63,6 @@ export default function CountdownPage() {
       <p
         className="text-white uppercase flex items-center"
         style={{
-          fontFamily: "'IBM Plex Sans Condensed', sans-serif",
           fontSize: "clamp(0.75rem, 1.13vw, 1.1rem)",
           lineHeight: 1.54,
           letterSpacing: "-0.02em",
@@ -67,17 +70,19 @@ export default function CountdownPage() {
         }}
       >
         {revealText}
-        <span
-          className="inline-block bg-white ml-[0.15em] animate-blink"
-          style={{ width: "0.5em", height: "0.65em" }}
-        />
+        {!isComplete && (
+          <span
+            className="inline-block bg-white ml-[0.15em] animate-blink"
+            style={{ width: "0.5em", height: "0.65em" }}
+          />
+        )}
       </p>
 
-      {/* Locked button — Figma style */}
+      {/* Locked button with pulse + shake */}
       <motion.button
         animate={shakeControls}
         onClick={handleLockedClick}
-        className="mt-4 flex items-center gap-2 bg-[#737373] rounded-full px-4 py-1.5 cursor-not-allowed"
+        className="mt-4 flex items-center gap-2 bg-[#737373] rounded-full px-4 py-1.5 cursor-not-allowed animate-pulse-subtle"
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-white">
           <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="2" />
@@ -86,7 +91,6 @@ export default function CountdownPage() {
         <span
           className="text-white uppercase"
           style={{
-            fontFamily: "'IBM Plex Sans Condensed', sans-serif",
             fontSize: "clamp(0.6rem, 0.7vw, 0.75rem)",
             letterSpacing: "-0.02em",
           }}
@@ -94,6 +98,6 @@ export default function CountdownPage() {
           LOCKED
         </span>
       </motion.button>
-    </div>
+    </motion.div>
   );
 }

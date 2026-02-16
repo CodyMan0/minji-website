@@ -11,8 +11,8 @@ interface PhotoViewerProps {
   onNavigate?: (direction: 1 | -1) => void;
 }
 
-const WHEEL_COOLDOWN_MS = 400;
-const SLIDE_OFFSET = "100vw";
+const WHEEL_COOLDOWN_MS = 600;
+const SLIDE_OFFSET = "60vw";
 
 export default function PhotoViewer({
   photo,
@@ -46,7 +46,7 @@ export default function PhotoViewer({
 
       const delta =
         Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      if (Math.abs(delta) < 10) return;
+      if (Math.abs(delta) < 30) return;
 
       const dir = delta > 0 ? 1 : -1;
       navigateWithDirection(dir);
@@ -82,7 +82,7 @@ export default function PhotoViewer({
         {isOpen && (
           <motion.div
             key="backdrop"
-            className="fixed inset-0 z-60 bg-black/90 cursor-pointer"
+            className="fixed inset-0 z-60 bg-black/70 cursor-pointer"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

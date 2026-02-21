@@ -87,8 +87,10 @@ export default function CountdownPage() {
             transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
             className="rounded-xl"
           >
-            <Link
-              href="/gallery"
+            <a
+              href="https://sgp-api.buy.mi.com/i18n_op/opx/kr/product-station/preview/kr/event/2026/xiaomi-launch-february-2026?id=9837344#"
+              target="_blank"
+              rel="noopener noreferrer"
               className="pl-2 pr-4 flex items-center bg-white rounded-xl"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -100,7 +102,7 @@ export default function CountdownPage() {
               <span className="text-black uppercase text-[clamp(0.6rem,0.8vw,1rem)] tracking-[-0.02em]">
                 REVEAL THE ANSWER
               </span>
-            </Link>
+            </a>
           </motion.div>
         </motion.div>
       ) : (

@@ -11,6 +11,14 @@ const ibmPlex = IBM_Plex_Sans_Condensed({
 export const metadata: Metadata = {
   title: "The Art of Light | XIAOMI KOREA x JDZ CHUNG",
   description: "빛이 머문 순간, JDZ의 방식으로. An online photography exhibition by JDZ CHUNG.",
+  icons: {
+    icon: "/icon.svg",
+  },
+  openGraph: {
+    title: "The Art of Light | XIAOMI KOREA x JDZ CHUNG",
+    description: "빛이 머문 순간, JDZ의 방식으로. An online photography exhibition by JDZ CHUNG.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

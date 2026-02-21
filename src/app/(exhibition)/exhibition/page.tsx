@@ -33,7 +33,6 @@ const CARD_BASE_VW = 28;
 const ENTRANCE_TARGET = 25;
 const ENTRANCE_OVERSHOOT = 2;
 
-/** Calculate card dimensions from actual image aspect ratio */
 function getCardSize(w: number, h: number): { width: string; height: string } {
   const ratio = w / h;
   if (ratio >= 1) {
@@ -210,14 +209,15 @@ export default function ExhibitionPage() {
                 onMouseLeave={() => setHoveredIndex(null)}
                 onClick={() => handlePhotoClick(i)}
               >
-                {/* Front face */}
+                {/* Front face — glass frame */}
                 <div
                   className="absolute inset-0 overflow-hidden bg-zinc-900"
                   style={{
+                    opacity: 0.92,
                     backfaceVisibility: "hidden",
                     boxShadow:
                       hoveredIndex === i
-                        ? "0 35px 100px rgba(0,0,0,0.8), 0 15px 40px rgba(0,0,0,0.6)"
+                        ? "0 35px 100px rgba(0,0,0,0.8), 0 15px 40px rgba(0,0,0,0.6), inset 0 0 30px rgba(255,255,255,0.05)"
                         : "0 25px 80px rgba(0,0,0,0.7), 0 10px 30px rgba(0,0,0,0.5)",
                     filter:
                       hoveredIndex === i ? "brightness(1.1)" : "brightness(1)",
@@ -232,9 +232,22 @@ export default function ExhibitionPage() {
                     sizes="(max-width: 768px) 70vw, 32vw"
                     priority={i < 6}
                   />
+                  {/* Glass reflection */}
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.04) 100%)",
+                    }}
+                  />
+                  {/* Glass border highlight */}
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+                  />
                 </div>
 
-                {/* Right edge — 3D thickness */}
+                {/* Right edge — glass */}
                 <div
                   className="absolute top-0"
                   style={{
@@ -243,11 +256,12 @@ export default function ExhibitionPage() {
                     right: 0,
                     transform: `translateX(${EDGE_THICKNESS}px) rotateY(90deg)`,
                     transformOrigin: "left center",
-                    background: "linear-gradient(to right, #aaa, #666)",
+                    background:
+                      "linear-gradient(to right, rgba(180,200,210,0.6), rgba(100,120,130,0.4))",
                   }}
                 />
 
-                {/* Bottom edge — 3D thickness */}
+                {/* Bottom edge — glass */}
                 <div
                   className="absolute left-0"
                   style={{
@@ -256,7 +270,8 @@ export default function ExhibitionPage() {
                     bottom: 0,
                     transform: `translateY(${EDGE_THICKNESS}px) rotateX(-90deg)`,
                     transformOrigin: "top center",
-                    background: "linear-gradient(to bottom, #999, #444)",
+                    background:
+                      "linear-gradient(to bottom, rgba(160,180,190,0.5), rgba(80,100,110,0.3))",
                   }}
                 />
               </div>

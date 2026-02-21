@@ -152,7 +152,7 @@ export default function PhotoViewer({
             className="fixed inset-0 z-60 flex items-center justify-center pointer-events-none"
             transition={
               useSlide
-                ? { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                ? { duration: 0.35, ease: "linear" }
                 : { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
             }
           >

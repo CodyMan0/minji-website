@@ -145,7 +145,10 @@ export default function ExhibitionPage() {
     (direction: 1 | -1) => {
       if (selectedIndex === null) return;
       const nextIndex = selectedIndex + direction;
-      if (nextIndex < 0 || nextIndex >= photos.length) return;
+      if (nextIndex < 0 || nextIndex >= photos.length) {
+        setSelectedIndex(null);
+        return;
+      }
       setSelectedIndex(nextIndex);
       scrollToPhoto(nextIndex);
     },

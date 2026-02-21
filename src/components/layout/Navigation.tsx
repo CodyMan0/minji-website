@@ -68,18 +68,19 @@ export default function Navigation() {
       <div className="flex items-center justify-between">
         <div
           ref={containerRef}
-          className="relative flex items-center bg-[#242424] rounded-2xl"
+          className="relative flex items-center bg-[#242424]"
           style={{
             padding: "0.23vw 0.29vw",
             gap: "0.29vw",
+            borderRadius: "0.764vw",
           }}
         >
-          {/* Active indicator — uses left/width animation, no scale transform */}
+          {/* Active indicator */}
           {activeRect && (
             <motion.div
               className="absolute bg-black"
               style={{
-                borderRadius: "0.5vw",
+                borderRadius: "0.634vw",
                 top: "0.23vw",
                 bottom: "0.23vw",
               }}
@@ -104,11 +105,11 @@ export default function Navigation() {
                 ref={(el) => {
                   tabRefs.current[i] = el;
                 }}
-                className="relative flex items-center justify-center uppercase"
+                className="relative flex items-center justify-center uppercase font-normal"
                 style={{
-                  borderRadius: "0.63vw",
-                  padding: "0.3vw 0.9vw",
-                  fontSize: "clamp(0.5625rem, 0.87vw, 1rem)",
+                  borderRadius: "0.634vw",
+                  padding: "0.3vw 2.2vw",
+                  fontSize: "clamp(0.5625rem, 0.968vw, 1.125rem)",
                   letterSpacing: "-0.02em",
                   lineHeight: "1.54",
                 }}
@@ -125,7 +126,7 @@ export default function Navigation() {
                 {!isActive && (
                   <motion.div
                     className="absolute inset-0 bg-white/0"
-                    style={{ borderRadius: "0.63vw" }}
+                    style={{ borderRadius: "0.634vw" }}
                     transition={{ duration: 0.004 }}
                   />
                 )}
@@ -135,16 +136,17 @@ export default function Navigation() {
         </div>
         <Link
           href="/countdown"
-          className={`flex items-center justify-center uppercase tabular-nums transition-colors rounded-xl ${
+          className={`flex items-center justify-center uppercase tabular-nums font-normal transition-colors ${
             pathname === "/countdown"
               ? "bg-white text-black"
               : "bg-[#242424]/70 text-[#707070] hover:text-white"
           }`}
           style={{
             padding: "0.4vw 1.4vw",
-            fontSize: "clamp(0.5625rem, 0.87vw, 1rem)",
+            fontSize: "clamp(0.5625rem, 0.968vw, 1.125rem)",
             letterSpacing: "-0.02em",
             lineHeight: "1.54",
+            borderRadius: "0.764vw",
           }}
         >
           {pathname === "/countdown"

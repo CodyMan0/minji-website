@@ -55,11 +55,16 @@ export default function LoadingPage() {
     if (phase === "star") setPhase("text");
   };
 
-  // Navigate to exhibition on click
-  const handleEnter = () => {
-    sessionStorage.setItem("loading-seen", "true");
-    router.replace("/exhibition");
-  };
+  // When typewriter completes, auto-navigate after delay
+  useEffect(() => {
+    if (phase === "text" && isComplete) {
+      const timeout = setTimeout(() => {
+        sessionStorage.setItem("loading-seen", "true");
+        router.replace("/exhibition");
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [phase, isComplete, router]);
 
   if (shouldSkip) {
     return <div className="min-h-screen bg-black" />;
@@ -67,8 +72,7 @@ export default function LoadingPage() {
 
   return (
     <div
-      className="min-h-screen bg-black flex items-center justify-center overflow-hidden cursor-pointer"
-      onClick={phase === "text" && isComplete ? handleEnter : undefined}
+      className="min-h-screen bg-black flex items-center justify-center overflow-hidden"
     >
       <AnimatePresence mode="wait">
         {/* Phase 1: Star — bottom-to-top clipPath reveal (matches loading page.mp4) */}

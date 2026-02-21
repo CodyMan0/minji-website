@@ -67,6 +67,7 @@ export default function ExhibitionPage() {
   );
 
   const maxProgress = (photos.length - 3) * DIAGONAL_X_STEP;
+  const totalCycle = photos.length * DIAGONAL_X_STEP;
 
   const selectedPhoto: Photo | null =
     selectedIndex !== null ? photos[selectedIndex] : null;
@@ -115,10 +116,7 @@ export default function ExhibitionPage() {
         SCROLL_SENSITIVITY;
       const vw = window.innerWidth / 100;
       const deltaVw = delta / vw;
-      targetProgress.current = Math.max(
-        0,
-        Math.min(maxProgress, targetProgress.current + deltaVw),
-      );
+      targetProgress.current = targetProgress.current + deltaVw;
     };
 
     el.addEventListener("wheel", handleWheel, { passive: false });
@@ -128,9 +126,12 @@ export default function ExhibitionPage() {
   const scrollToPhoto = useCallback(
     (index: number) => {
       const progress = getProgressForIndex(index);
-      targetProgress.current = Math.min(progress, maxProgress);
+      // Find the closest wrapped position to avoid jumping
+      const current = targetProgress.current;
+      const currentCycle = Math.round(current / totalCycle) * totalCycle;
+      targetProgress.current = currentCycle + progress;
     },
-    [maxProgress],
+    [totalCycle],
   );
 
   const handlePhotoClick = useCallback(
@@ -144,11 +145,8 @@ export default function ExhibitionPage() {
   const handleNavigate = useCallback(
     (direction: 1 | -1) => {
       if (selectedIndex === null) return;
-      const nextIndex = selectedIndex + direction;
-      if (nextIndex < 0 || nextIndex >= photos.length) {
-        setSelectedIndex(null);
-        return;
-      }
+      const nextIndex =
+        (selectedIndex + direction + photos.length) % photos.length;
       setSelectedIndex(nextIndex);
       scrollToPhoto(nextIndex);
     },
@@ -161,8 +159,10 @@ export default function ExhibitionPage() {
 
   const yRatio = DIAGONAL_Y_STEP / DIAGONAL_X_STEP;
 
+  const wrappedProgress =
+    ((scrollProgress % totalCycle) + totalCycle) % totalCycle;
   const currentIndex = Math.min(
-    Math.floor(scrollProgress / DIAGONAL_X_STEP),
+    Math.floor(wrappedProgress / DIAGONAL_X_STEP),
     photos.length - 1,
   );
 
@@ -174,19 +174,20 @@ export default function ExhibitionPage() {
         className="fixed inset-0 overflow-hidden"
         style={{ perspective: "1200px", zIndex: 1 }}
       >
-        {/* Diagonal photo strip */}
+        {/* Diagonal photo strip — 2 sets for seamless loop */}
         <div
           className="absolute w-full h-full"
           style={{
             transformStyle: "preserve-3d",
-            transform: `translate(${-scrollProgress}vw, ${-scrollProgress * yRatio}vw)`,
+            transform: `translate(${-wrappedProgress}vw, ${-wrappedProgress * yRatio}vw)`,
             willChange: "transform",
             opacity: mounted ? 1 : 0,
           }}
         >
-          {photos.map((photo, i) => {
-            const x = i * DIAGONAL_X_STEP + X_OFFSET;
-            const y = i * DIAGONAL_Y_STEP + Y_OFFSET;
+          {[0, 1].flatMap((set) =>
+            photos.map((photo, i) => {
+            const x = (i + set * photos.length) * DIAGONAL_X_STEP + X_OFFSET;
+            const y = (i + set * photos.length) * DIAGONAL_Y_STEP + Y_OFFSET;
             const { width: cardW, height: cardH } = getCardSize(
               photo.width,
               photo.height,
@@ -194,7 +195,7 @@ export default function ExhibitionPage() {
 
             return (
               <div
-                key={photo.id}
+                key={`${set}-${photo.id}`}
                 className="absolute cursor-pointer"
                 style={{
                   left: `${x}vw`,
@@ -279,7 +280,7 @@ export default function ExhibitionPage() {
                 />
               </div>
             );
-          })}
+          }))}
         </div>
 
         {/* Card counter */}

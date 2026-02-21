@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useCountdown } from "@/hooks/useCountdown";
-import { LAUNCH_DATE } from "@/lib/constants";
+import { useDebugDate } from "@/contexts/DebugDateContext";
 import { padTwo } from "@/lib/format";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -20,8 +20,9 @@ interface TabRect {
 }
 
 export default function Navigation() {
+  const { adjustedDate } = useDebugDate();
   const { days, hours, minutes, seconds, isExpired } =
-    useCountdown(LAUNCH_DATE);
+    useCountdown(adjustedDate);
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
@@ -140,13 +141,17 @@ export default function Navigation() {
               : "bg-[#242424]/70 text-[#707070] hover:text-white"
           }`}
           style={{
-            padding: "0.23vw 0.87vw",
+            padding: "0.4vw 1.4vw",
             fontSize: "clamp(0.5625rem, 0.87vw, 1rem)",
             letterSpacing: "-0.02em",
             lineHeight: "1.54",
           }}
         >
-          {pathname === "/countdown" ? "COMING SOON" : countdown}
+          {pathname === "/countdown"
+            ? isExpired
+              ? "UNLOCKED!"
+              : "COMING SOON"
+            : countdown}
         </Link>
       </div>
     </motion.nav>

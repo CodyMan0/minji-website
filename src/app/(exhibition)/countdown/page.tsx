@@ -3,18 +3,29 @@
 import { useCountdown } from "@/hooks/useCountdown";
 import { useTypewriter } from "@/hooks/useTypewriter";
 import { LAUNCH_DATE } from "@/lib/constants";
+import { useDebugDate } from "@/contexts/DebugDateContext";
 import { padTwo } from "@/lib/format";
 import { motion, useAnimation } from "framer-motion";
+import Link from "next/link";
 
 export default function CountdownPage() {
-  const { days, hours, minutes, seconds } = useCountdown(LAUNCH_DATE);
+  const { adjustedDate, setDateOffset } = useDebugDate();
+
+  const { days, hours, minutes, seconds, isExpired } =
+    useCountdown(adjustedDate);
   const shakeControls = useAnimation();
 
+  const unlocked = isExpired;
+
   const totalHours = days * 24 + hours;
-  const display = `${padTwo(totalHours)}:${padTwo(minutes)}:${padTwo(seconds)} (KST)`;
+  const display = unlocked
+    ? "00:00:00 (KST)"
+    : `${padTwo(totalHours)}:${padTwo(minutes)}:${padTwo(seconds)} (KST)`;
+
+  const revealMessage = unlocked ? "THE ANSWER IS HERE" : "GET READY FOR THE REVEAL";
 
   const { displayText: revealText } = useTypewriter(
-    "GET READY FOR THE REVEAL",
+    revealMessage,
     60,
     500,
   );
@@ -28,6 +39,7 @@ export default function CountdownPage() {
   };
 
   return (
+    <>
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -47,23 +59,110 @@ export default function CountdownPage() {
         <span className="inline-block bg-white ml-[0.15em] w-[0.57em] h-[0.7em] animate-blink" />
       </p>
 
-      {/* Locked button — no hover, iPhone-like shake on click */}
-      <motion.div animate={shakeControls}>
-        <button
-          onClick={handleLockedClick}
-          className="pl-2 pr-4 flex items-center bg-[#737373] rounded-xl cursor-not-allowed select-none"
+      {/* Button — locked or unlocked state */}
+      {unlocked ? (
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{
+            scale: [0.9, 1.08, 1],
+            opacity: 1,
+            boxShadow: [
+              "0 0 0px rgba(255,255,255,0)",
+              "0 0 30px rgba(255,255,255,0.6)",
+              "0 0 0px rgba(255,255,255,0)",
+            ],
+          }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="rounded-xl"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/lock-icon.png"
-            alt="Lock"
-            className="w-[clamp(0.8rem,1.5vw,2rem)] h-auto"
-          />
-          <span className="text-white uppercase text-[clamp(0.6rem,0.8vw,1rem)] tracking-[-0.02em]">
-            LOCKED
-          </span>
-        </button>
-      </motion.div>
+          <motion.div
+            animate={{
+              scale: [1, 1.02, 1],
+              boxShadow: [
+                "0 0 0px rgba(255,255,255,0)",
+                "0 0 15px rgba(255,255,255,0.4)",
+                "0 0 0px rgba(255,255,255,0)",
+              ],
+            }}
+            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+            className="rounded-xl"
+          >
+            <Link
+              href="/gallery"
+              className="pl-2 pr-4 flex items-center bg-white rounded-xl"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/unlock-icon.png"
+                alt="Unlock"
+                className="w-[clamp(0.8rem,1.5vw,2rem)] h-auto"
+              />
+              <span className="text-black uppercase text-[clamp(0.6rem,0.8vw,1rem)] tracking-[-0.02em]">
+                REVEAL THE ANSWER
+              </span>
+            </Link>
+          </motion.div>
+        </motion.div>
+      ) : (
+        <motion.div animate={shakeControls}>
+          <button
+            onClick={handleLockedClick}
+            className="pl-2 pr-4 flex items-center bg-[#737373] rounded-xl cursor-not-allowed select-none"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/lock-icon.png"
+              alt="Lock"
+              className="w-[clamp(0.8rem,1.5vw,2rem)] h-auto"
+            />
+            <span className="text-white uppercase text-[clamp(0.6rem,0.8vw,1rem)] tracking-[-0.02em]">
+              LOCKED
+            </span>
+          </button>
+        </motion.div>
+      )}
+
     </motion.div>
+
+    {/* Debug: launch date controller — outside motion container for clickability */}
+    <div className="fixed right-4 top-1/2 -translate-y-1/2 z-[100] flex flex-col gap-1.5 bg-zinc-800 rounded-lg px-2 py-2 opacity-50 hover:opacity-100 transition-opacity">
+      <button
+        onClick={() => setDateOffset((v) => v - 3600)}
+        className="text-zinc-400 text-xs px-2 py-1 rounded hover:bg-zinc-700"
+      >
+        -1h
+      </button>
+      <button
+        onClick={() => setDateOffset((v) => v - 60)}
+        className="text-zinc-400 text-xs px-2 py-1 rounded hover:bg-zinc-700"
+      >
+        -1m
+      </button>
+      <button
+        onClick={() => setDateOffset(-LAUNCH_DATE.getTime() / 1000 + Date.now() / 1000 - 1)}
+        className="text-zinc-400 text-xs px-2 py-1 rounded hover:bg-zinc-700 text-yellow-400"
+      >
+        Expire
+      </button>
+      <button
+        onClick={() => setDateOffset(0)}
+        className="text-zinc-400 text-xs px-2 py-1 rounded hover:bg-zinc-700"
+      >
+        Reset
+      </button>
+      <button
+        onClick={() => setDateOffset((v) => v + 60)}
+        className="text-zinc-400 text-xs px-2 py-1 rounded hover:bg-zinc-700"
+      >
+        +1m
+      </button>
+      <button
+        onClick={() => setDateOffset((v) => v + 3600)}
+        className="text-zinc-400 text-xs px-2 py-1 rounded hover:bg-zinc-700"
+      >
+        +1h
+      </button>
+    </div>
+    </>
   );
 }

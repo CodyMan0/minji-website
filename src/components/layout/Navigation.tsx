@@ -107,7 +107,7 @@ export default function Navigation() {
                 style={{
                   borderRadius: "0.63vw",
                   padding: "0.3vw 0.9vw",
-                  fontSize: "clamp(0.625rem, 0.97vw, 1.125rem)",
+                  fontSize: "clamp(0.5625rem, 0.87vw, 1rem)",
                   letterSpacing: "-0.02em",
                   lineHeight: "1.54",
                 }}
@@ -141,7 +141,7 @@ export default function Navigation() {
           }`}
           style={{
             padding: "0.23vw 0.87vw",
-            fontSize: "clamp(0.625rem, 0.97vw, 1.125rem)",
+            fontSize: "clamp(0.5625rem, 0.87vw, 1rem)",
             letterSpacing: "-0.02em",
             lineHeight: "1.54",
           }}

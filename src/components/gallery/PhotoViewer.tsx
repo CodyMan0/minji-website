@@ -166,7 +166,7 @@ export default function PhotoViewer({
                 width={photo.width}
                 height={photo.height}
                 className="max-h-[80vh] max-w-[90vw] w-auto h-auto"
-                sizes="(max-width: 896px) 90vw, 56rem"
+                unoptimized
                 priority
               />
               <p className="mt-3 text-xs uppercase tracking-widest text-zinc-500">

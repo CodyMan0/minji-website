@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTypewriter } from "@/hooks/useTypewriter";
+import { photos } from "@/lib/photos";
 
 type Phase = "star" | "text" | "done";
 
@@ -15,6 +16,14 @@ export default function LoadingPage() {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("star");
   const [shouldSkip, setShouldSkip] = useState(false);
+  // Preload exhibition photos during loading animation
+  useEffect(() => {
+    photos.forEach((photo) => {
+      const img = new window.Image();
+      img.src = photo.src;
+    });
+  }, []);
+
   // Check if loading should be shown (only on refresh or direct / navigation)
   useEffect(() => {
     const navEntries = performance.getEntriesByType(

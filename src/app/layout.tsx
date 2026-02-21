@@ -21,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body
-        className={`${ibmPlex.variable} ${ibmPlex.className} antialiased`}
+        className={`${ibmPlex.variable} ${ibmPlex.className} antialiased bg-black`}
       >
         {children}
       </body>

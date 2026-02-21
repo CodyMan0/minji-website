@@ -1,4 +1,4 @@
-export const LAUNCH_DATE = new Date("2026-03-06T00:00:00+09:00");
+export const LAUNCH_DATE = new Date("2026-02-23T18:00:00+09:00");
 
 export const PHOTOS = Array.from({ length: 10 }, (_, i) => ({
   id: `JDZ-${String(i + 1).padStart(2, "0")}`,

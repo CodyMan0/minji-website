@@ -27,7 +27,11 @@ export default function Navigation() {
   const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [activeRect, setActiveRect] = useState<TabRect | null>(null);
 
-  const activeIndex = tabs.findIndex((tab) => tab.href === pathname);
+  const activeIndex = tabs.findIndex(
+    (tab) =>
+      tab.href === pathname ||
+      (pathname === "/countdown" && tab.href === "/master"),
+  );
 
   const measureActiveTab = useCallback(() => {
     const container = containerRef.current;
@@ -91,7 +95,7 @@ export default function Navigation() {
           )}
 
           {tabs.map((tab, i) => {
-            const isActive = pathname === tab.href;
+            const isActive = i === activeIndex;
             return (
               <Link
                 key={tab.href}
@@ -121,7 +125,6 @@ export default function Navigation() {
                   <motion.div
                     className="absolute inset-0 bg-white/0"
                     style={{ borderRadius: "0.63vw" }}
-                    whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
                     transition={{ duration: 0.004 }}
                   />
                 )}
@@ -131,13 +134,12 @@ export default function Navigation() {
         </div>
         <Link
           href="/countdown"
-          className={`flex items-center justify-center uppercase tabular-nums transition-colors ${
+          className={`flex items-center justify-center uppercase tabular-nums transition-colors rounded-xl ${
             pathname === "/countdown"
               ? "bg-white text-black"
               : "bg-[#242424]/70 text-[#707070] hover:text-white"
           }`}
           style={{
-            borderRadius: "0.76vw",
             padding: "0.23vw 0.87vw",
             fontSize: "clamp(0.625rem, 0.97vw, 1.125rem)",
             letterSpacing: "-0.02em",

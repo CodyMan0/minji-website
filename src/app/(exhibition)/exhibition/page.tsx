@@ -169,7 +169,7 @@ export default function ExhibitionPage() {
       {/* Fixed viewport container */}
       <div
         ref={containerRef}
-        className="fixed inset-0 bg-black overflow-hidden"
+        className="fixed inset-0 overflow-hidden"
         style={{ perspective: "1200px", zIndex: 1 }}
       >
         {/* Diagonal photo strip */}

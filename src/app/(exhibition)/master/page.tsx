@@ -5,7 +5,7 @@ import { ARTIST } from "@/lib/constants";
 
 export default function MasterPage() {
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-black text-white flex items-center">
+    <div className="min-h-[calc(100vh-5rem)] text-white flex items-center">
       {/* Content area */}
       <motion.div
         className="w-full px-8 md:px-12 lg:px-24"

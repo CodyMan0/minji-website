@@ -54,11 +54,10 @@ export default function Navigation() {
     return () => window.removeEventListener("resize", measureActiveTab);
   }, [measureActiveTab]);
 
+  const totalHours = days * 24 + hours;
   const countdown = isExpired
     ? "LIVE"
-    : days > 0
-      ? `${days}D ${padTwo(hours)}:${padTwo(minutes)}:${padTwo(seconds)}`
-      : `${padTwo(hours)}:${padTwo(minutes)}:${padTwo(seconds)}`;
+    : `${padTwo(totalHours)}:${padTwo(minutes)}:${padTwo(seconds)} (KST)`;
 
   return (
     <motion.nav

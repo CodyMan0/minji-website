@@ -10,8 +10,20 @@ import { useTypewriter } from "@/hooks/useTypewriter";
 
 // Repeating aspect ratio pattern for visual variety
 const ASPECT_PATTERNS = [
-  ["aspect-[4/3]", "aspect-[3/4]", "aspect-square", "aspect-[3/4]", "aspect-[4/3]"],
-  ["aspect-square", "aspect-[4/3]", "aspect-[2/3]", "aspect-[4/3]", "aspect-square"],
+  [
+    "aspect-[4/3]",
+    "aspect-[3/4]",
+    "aspect-square",
+    "aspect-[3/4]",
+    "aspect-[4/3]",
+  ],
+  [
+    "aspect-square",
+    "aspect-[4/3]",
+    "aspect-[2/3]",
+    "aspect-[4/3]",
+    "aspect-square",
+  ],
 ];
 
 const COLUMNS = 5;
@@ -23,18 +35,18 @@ function TypingTextSection() {
   const { displayText: line1, isComplete: line1Done } = useTypewriter(
     "WHAT DO YOU THINK IT WAS SHOT ON?",
     60,
-    isInView ? 0 : 999999
+    isInView ? 0 : 999999,
   );
   const { displayText: line2 } = useTypewriter(
     "WAIT FOR THE FINAL REVEAL",
     60,
-    line1Done ? 400 : 999999
+    line1Done ? 400 : 999999,
   );
 
   return (
     <section
       ref={sectionRef}
-      className="py-24 flex flex-col items-center justify-center gap-3 px-8"
+      className=" flex flex-col items-center justify-center gap-3 px-8"
     >
       <p
         className="uppercase text-center text-white flex items-center justify-center"
@@ -111,7 +123,7 @@ export default function GalleryPage() {
       if (nextIndex < 0 || nextIndex >= photos.length) return;
       setSelectedIndex(nextIndex);
     },
-    [selectedIndex]
+    [selectedIndex],
   );
 
   const handleClose = useCallback(() => {
@@ -120,7 +132,7 @@ export default function GalleryPage() {
 
   return (
     <>
-      <section className="min-h-screen px-4 md:px-6 lg:px-8 pt-24 pb-16">
+      <section className="h-screen px-4 md:px-6 lg:px-8 pt-24 pb-16">
         <div className="w-full grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 items-start">
           {photos.map((photo, i) => {
             const rowIndex = Math.floor(i / COLUMNS);

@@ -7,11 +7,11 @@ import { ARTIST } from "@/lib/constants";
 
 /* ── Intro animation timing (seconds) ── */
 const SQUARE1_APPEAR = 0.3;
-const BLINK_START = 0.8;
-const BLINK_DURATION = 0.25;
+const BLINK_START = 0.4;
+const BLINK_DURATION = 0.1;
 const BLINK_COUNT = 3;
-const SQUARE2_APPEAR = BLINK_START + BLINK_COUNT * BLINK_DURATION * 2 + 0.3;
-const SQUARE3_APPEAR = SQUARE2_APPEAR + 0.6;
+const SQUARE2_APPEAR = BLINK_START + BLINK_COUNT * BLINK_DURATION * 2 + 0.1;
+const SQUARE3_APPEAR = SQUARE2_APPEAR + 0.2;
 const CONTENT_FADE_IN = SQUARE3_APPEAR + 0.8;
 
 const WHEEL_THRESHOLD = 50;
@@ -78,11 +78,11 @@ export default function MasterPage() {
       <motion.div
         className="absolute inset-0"
         initial={{ opacity: 0 }}
-        animate={{ opacity: phase >= 4 ? 0.17 : 0 }}
+        animate={{ opacity: phase >= 4 ? 1 : 0 }}
         transition={{ duration: 1.5, ease: "easeOut" }}
       >
         <Image
-          src="/images/hero.jpg"
+          src="/images/master-jdz.png"
           alt="JDZ CHUNG"
           fill
           className="object-cover object-top"
@@ -101,30 +101,39 @@ export default function MasterPage() {
             phase >= 1
               ? {
                   opacity:
-                    phase >= 2
-                      ? 1
-                      : [0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
+                    phase >= 2 ? 1 : [0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
                 }
               : { opacity: 0 }
           }
           transition={
             phase >= 2
               ? { duration: 0.3 }
-              : { duration: BLINK_COUNT * BLINK_DURATION * 2 + 0.4, ease: "linear" }
+              : {
+                  duration: BLINK_COUNT * BLINK_DURATION * 2 + 0.4,
+                  ease: "linear",
+                }
           }
         />
         <motion.span
           className="absolute w-[10px] h-[10px] bg-white"
           style={{ top: "15%" }}
           initial={{ opacity: 0, left: "5%" }}
-          animate={phase >= 2 ? { opacity: 1, left: "28%" } : { opacity: 0, left: "5%" }}
+          animate={
+            phase >= 2
+              ? { opacity: 1, left: "28%" }
+              : { opacity: 0, left: "5%" }
+          }
           transition={{ duration: 0.5, ease: "easeOut" }}
         />
         <motion.span
           className="absolute w-[10px] h-[10px] bg-white"
           style={{ top: "15%" }}
           initial={{ opacity: 0, left: "28%" }}
-          animate={phase >= 3 ? { opacity: 1, left: "95%" } : { opacity: 0, left: "28%" }}
+          animate={
+            phase >= 3
+              ? { opacity: 1, left: "95%" }
+              : { opacity: 0, left: "28%" }
+          }
           transition={{ duration: 0.6, ease: "easeOut" }}
         />
       </div>

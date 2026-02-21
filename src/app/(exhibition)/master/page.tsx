@@ -1,65 +1,186 @@
 "use client";
 
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { ARTIST } from "@/lib/constants";
 
+/* ── Intro animation timing (seconds) ── */
+const SQUARE1_APPEAR = 0.3;
+const BLINK_START = 0.8;
+const BLINK_DURATION = 0.25;
+const BLINK_COUNT = 3;
+const SQUARE2_APPEAR = BLINK_START + BLINK_COUNT * BLINK_DURATION * 2 + 0.3;
+const SQUARE3_APPEAR = SQUARE2_APPEAR + 0.6;
+const CONTENT_FADE_IN = SQUARE3_APPEAR + 0.8;
+
+const WHEEL_THRESHOLD = 50;
+const SCROLL_STEPS = [0, 40, 75];
+
 export default function MasterPage() {
+  const [phase, setPhase] = useState(0);
+  const [step, setStep] = useState(0);
+  const wheelAccum = useRef(0);
+  const isTransitioning = useRef(false);
+
+  useEffect(() => {
+    const timers = [
+      setTimeout(() => setPhase(1), SQUARE1_APPEAR * 1000),
+      setTimeout(() => setPhase(2), SQUARE2_APPEAR * 1000),
+      setTimeout(() => setPhase(3), SQUARE3_APPEAR * 1000),
+      setTimeout(() => setPhase(4), CONTENT_FADE_IN * 1000),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  const goStep = useCallback((next: number) => {
+    if (isTransitioning.current) return;
+    isTransitioning.current = true;
+    setStep(next);
+    setTimeout(() => {
+      isTransitioning.current = false;
+    }, 600);
+  }, []);
+
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      if (phase < 4) return;
+
+      wheelAccum.current += e.deltaY;
+
+      if (wheelAccum.current > WHEEL_THRESHOLD) {
+        wheelAccum.current = 0;
+        setStep((prev) => {
+          const next = Math.min(prev + 1, SCROLL_STEPS.length - 1);
+          if (next !== prev) goStep(next);
+          return prev;
+        });
+      } else if (wheelAccum.current < -WHEEL_THRESHOLD) {
+        wheelAccum.current = 0;
+        setStep((prev) => {
+          const next = Math.max(prev - 1, 0);
+          if (next !== prev) goStep(next);
+          return prev;
+        });
+      }
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    return () => window.removeEventListener("wheel", handleWheel);
+  }, [phase, goStep]);
+
+  const translateY = SCROLL_STEPS[step];
+
   return (
-    <div className="min-h-[calc(100vh-5rem)] text-white flex items-center">
-      {/* Content area */}
+    <div className="relative h-[calc(100dvh-5rem)] overflow-hidden text-white">
+      {/* Background JDZ photo */}
       <motion.div
-        className="w-full px-8 md:px-12 lg:px-24"
+        className="absolute inset-0"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
+        animate={{ opacity: phase >= 4 ? 0.17 : 0 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
       >
-        {/* 01 ABOUT */}
+        <Image
+          src="/images/hero.jpg"
+          alt="JDZ CHUNG"
+          fill
+          className="object-cover object-top"
+          style={{ mixBlendMode: "luminosity" }}
+          priority
+        />
+      </motion.div>
+
+      {/* Three squares — fixed position */}
+      <div className="absolute inset-0 pointer-events-none z-20">
+        <motion.span
+          className="absolute w-[10px] h-[10px] bg-white"
+          style={{ left: "5%", top: "15%" }}
+          initial={{ opacity: 0 }}
+          animate={
+            phase >= 1
+              ? {
+                  opacity:
+                    phase >= 2
+                      ? 1
+                      : [0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
+                }
+              : { opacity: 0 }
+          }
+          transition={
+            phase >= 2
+              ? { duration: 0.3 }
+              : { duration: BLINK_COUNT * BLINK_DURATION * 2 + 0.4, ease: "linear" }
+          }
+        />
+        <motion.span
+          className="absolute w-[10px] h-[10px] bg-white"
+          style={{ top: "15%" }}
+          initial={{ opacity: 0, left: "5%" }}
+          animate={phase >= 2 ? { opacity: 1, left: "28%" } : { opacity: 0, left: "5%" }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        />
+        <motion.span
+          className="absolute w-[10px] h-[10px] bg-white"
+          style={{ top: "15%" }}
+          initial={{ opacity: 0, left: "28%" }}
+          animate={phase >= 3 ? { opacity: 1, left: "95%" } : { opacity: 0, left: "28%" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        />
+      </div>
+
+      {/* ── Sliding content layer ── */}
+      <motion.div
+        className="relative z-10 px-[5%]"
+        animate={{ y: `-${translateY}%` }}
+        transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
+      >
+        {/* Hero: title + bio */}
         <motion.div
-          className="mb-24"
-          initial={{ y: 60, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          className="h-[calc(100dvh-5rem)] flex flex-col justify-center"
+          initial={{ opacity: 0, y: 15 }}
+          animate={phase >= 4 ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
         >
-          <div className="flex items-end gap-40 mb-10">
-            <div>
-              <span className="inline-block w-2.5 h-2.5 bg-white mb-3" />
-              <p className="text-3xl md:text-4xl font-light">01</p>
-            </div>
-            <div>
-              <span className="inline-block w-2.5 h-2.5 bg-white mb-3" />
-              <p className="text-3xl md:text-4xl font-light uppercase tracking-wider">
+          <div className="mt-[-5%]">
+            <h1 className="text-[clamp(1.2rem,2vw,2.2rem)] font-semibold mb-5 tracking-tight">
+              마스터 포토그래퍼 JDZ
+            </h1>
+            <p className="text-[clamp(0.7rem,1vw,0.95rem)] leading-[1.75] text-white/90 max-w-3xl whitespace-pre-line">
+              {ARTIST.bio}
+            </p>
+          </div>
+        </motion.div>
+
+        {/* 01 ABOUT */}
+        <div className="h-[calc(100dvh-5rem)] flex flex-col justify-center">
+          <div>
+            <div className="flex items-end gap-20 mb-6">
+              <p className="text-[clamp(1.2rem,2vw,2rem)] font-light">01</p>
+              <p className="text-[clamp(1.2rem,2vw,2rem)] font-light uppercase tracking-wider">
                 ABOUT
               </p>
             </div>
-            <span className="inline-block w-2.5 h-2.5 bg-white ml-auto mb-3" />
+            <p className="text-[clamp(0.7rem,0.9vw,0.875rem)] leading-[1.75] text-white/85 max-w-4xl whitespace-pre-line">
+              {ARTIST.about}
+            </p>
           </div>
-          <p className="text-base md:text-lg text-white leading-relaxed max-w-5xl">
-            {ARTIST.about}
-          </p>
-        </motion.div>
+        </div>
 
         {/* 02 PHILOSOPHY */}
-        <motion.div
-          initial={{ y: 60, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="flex items-end gap-40 mb-10">
-            <div>
-              <p className="text-3xl md:text-4xl font-light">02</p>
-            </div>
-            <div>
-              <p className="text-3xl md:text-4xl font-light uppercase tracking-wider">
+        <div className="h-[calc(100dvh-5rem)] flex flex-col justify-center">
+          <div>
+            <div className="flex items-end gap-20 mb-6">
+              <p className="text-[clamp(1.2rem,2vw,2rem)] font-light">02</p>
+              <p className="text-[clamp(1.2rem,2vw,2rem)] font-light uppercase tracking-wider">
                 PHILOSOPHY
               </p>
             </div>
+            <p className="text-[clamp(0.7rem,0.9vw,0.875rem)] leading-[1.75] text-white/85 max-w-4xl whitespace-pre-line">
+              {ARTIST.philosophy}
+            </p>
           </div>
-          <p className="text-base md:text-lg text-white leading-relaxed max-w-5xl">
-            {ARTIST.philosophy}
-          </p>
-        </motion.div>
+        </div>
       </motion.div>
     </div>
   );

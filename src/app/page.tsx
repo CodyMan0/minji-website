@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTypewriter } from "@/hooks/useTypewriter";
 import { photos } from "@/lib/photos";
 
-type Phase = "star" | "text" | "done";
+type Phase = "star" | "text";
 
 /** Star reveal total duration in seconds */
 const STAR_REVEAL_DURATION = 3.5;
@@ -55,30 +55,21 @@ export default function LoadingPage() {
     if (phase === "star") setPhase("text");
   };
 
-  // When typewriter completes, show collaboration text then navigate
-  useEffect(() => {
-    if (phase === "text" && isComplete) {
-      const timeout = setTimeout(() => {
-        setPhase("done");
-      }, 2000);
-      return () => clearTimeout(timeout);
-    }
-  }, [phase, isComplete]);
-
-  // Navigate to exhibition when done
-  useEffect(() => {
-    if (phase === "done") {
-      sessionStorage.setItem("loading-seen", "true");
-      router.replace("/exhibition");
-    }
-  }, [phase, router]);
+  // Navigate to exhibition on click
+  const handleEnter = () => {
+    sessionStorage.setItem("loading-seen", "true");
+    router.replace("/exhibition");
+  };
 
   if (shouldSkip) {
     return <div className="min-h-screen bg-black" />;
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center overflow-hidden">
+    <div
+      className="min-h-screen bg-black flex items-center justify-center overflow-hidden cursor-pointer"
+      onClick={phase === "text" && isComplete ? handleEnter : undefined}
+    >
       <AnimatePresence mode="wait">
         {/* Phase 1: Star — bottom-to-top clipPath reveal (matches loading page.mp4) */}
         {phase === "star" && (
@@ -123,18 +114,18 @@ export default function LoadingPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.5 } }}
             transition={{ duration: 0.3 }}
-            className="flex flex-col items-center"
+            className="flex flex-col items-center text-center"
           >
             <h1
-              className="font-normal text-white uppercase flex items-center leading-[1.54]"
+              className="relative font-normal text-white uppercase leading-[1.54]"
               style={{
-                fontSize: "clamp(1.25rem, 1.49vw, 2rem)",
+                fontSize: "clamp(2.5rem, 1.49vw, 2rem)",
                 letterSpacing: "-0.02em",
               }}
             >
               {displayText}
               <span
-                className="inline-block bg-white ml-[0.15em] animate-blink"
+                className="absolute bg-white ml-[0.15em] animate-blink top-1/2 -translate-y-1/2"
                 style={{ width: "0.57em", height: "0.7em" }}
               />
             </h1>

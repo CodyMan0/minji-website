@@ -60,6 +60,7 @@ export default function ExhibitionPage() {
   const hasBounced = useRef(false);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
+  const isDragging = useRef(false);
 
   const isMobile = useSyncExternalStore(
     () => () => {},
@@ -140,10 +141,12 @@ export default function ExhibitionPage() {
     const handleTouchStart = (e: TouchEvent) => {
       touchStartX.current = e.touches[0].clientX;
       touchStartY.current = e.touches[0].clientY;
+      isDragging.current = false;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       e.preventDefault();
+      isDragging.current = true;
       const dx = touchStartX.current - e.touches[0].clientX;
       const dy = touchStartY.current - e.touches[0].clientY;
       const delta = (Math.abs(dy) > Math.abs(dx) ? dy : dx) * SCROLL_SENSITIVITY;
@@ -175,6 +178,7 @@ export default function ExhibitionPage() {
 
   const handlePhotoClick = useCallback(
     (index: number) => {
+      if (isDragging.current) return;
       setSelectedIndex(index);
       scrollToPhoto(index);
     },

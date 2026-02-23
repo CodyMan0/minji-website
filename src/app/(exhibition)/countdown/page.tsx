@@ -58,6 +58,7 @@ export default function CountdownPage() {
         </p>
 
         {/* Button — locked or unlocked state */}
+        <div className="min-h-[2.5rem]">
         {unlocked ? (
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -122,6 +123,7 @@ export default function CountdownPage() {
             </button>
           </motion.div>
         )}
+        </div>
       </motion.div>
     </>
   );

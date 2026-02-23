@@ -7,7 +7,7 @@ export const PHOTOS = Array.from({ length: 10 }, (_, i) => ({
 }));
 
 export const NAV_LINKS = [
-  { label: "INDEX", href: "/gallery" },
+  { label: "OVERVIEW", href: "/gallery" },
   { label: "MASTER PHOTOGRAPHER JDZ", href: "/master" },
 ] as const;
 

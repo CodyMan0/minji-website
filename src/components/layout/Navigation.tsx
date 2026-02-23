@@ -10,9 +10,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
 const tabs = [
-  { href: "/exhibition", label: "THE ART OF LIGHT", mobileLabel: "EXHIBITION" },
-  { href: "/gallery", label: "OVERVIEW", mobileLabel: "OVERVIEW" },
-  { href: "/master", label: "MASTER PHOTOGRAPHER JDZ", mobileLabel: "JDZ" },
+  { href: "/exhibition", label: "EXHIBITION" },
+  { href: "/gallery", label: "OVERVIEW" },
+  { href: "/master", label: "MASTER PHOTOGRAPHER JDZ" },
 ];
 
 interface TabRect {
@@ -64,12 +64,15 @@ export default function Navigation() {
   return (
     <motion.nav
       className="fixed top-0 left-0 right-0 z-50"
-      style={{ padding: "clamp(0.5rem, 1.22vw, 1.22vw) clamp(0.5rem, 1.33vw, 1.33vw) 0" }}
+      style={{
+        padding:
+          "clamp(0.4rem, 1.22vw, 1.22vw) clamp(0.4rem, 1.33vw, 1.33vw) 0",
+      }}
     >
       <div className="flex items-center justify-between">
         <div
           ref={containerRef}
-          className="relative flex items-center bg-[#242424]"
+          className="relative flex items-center bg-[#242424] font-(family-name:--font-ibm-plex-mono)"
           style={{
             padding: "clamp(2px, 0.23vw, 4px) clamp(3px, 0.29vw, 5px)",
             gap: "clamp(2px, 0.29vw, 5px)",
@@ -106,12 +109,13 @@ export default function Navigation() {
                 ref={(el) => {
                   tabRefs.current[i] = el;
                 }}
-                className="relative flex items-center justify-center uppercase font-normal min-h-[44px]"
+                className="relative flex items-center justify-center uppercase font-normal min-h-8 md:min-h-11"
                 style={{
                   borderRadius: "clamp(5px, 0.634vw, 10px)",
-                  padding: "clamp(0.3rem, 0.3vw, 0.5rem) clamp(0.6rem, 2.2vw, 2.5rem)",
-                  fontSize: "clamp(0.5625rem, 0.968vw, 1.125rem)",
-                  letterSpacing: "-0.02em",
+                  padding:
+                    "clamp(0.2rem, 0.3vw, 0.5rem) clamp(0.5rem, 2.2vw, 2.5rem)",
+                  fontSize: "clamp(0.6875rem, 0.968vw, 1.125rem)",
+                  letterSpacing: "-0.07em",
                   lineHeight: "1.54",
                 }}
               >
@@ -122,7 +126,7 @@ export default function Navigation() {
                       : "text-[#707070] hover:text-zinc-200"
                   }`}
                 >
-                  {isMobile ? tab.mobileLabel : tab.label}
+                  {tab.label}
                 </span>
                 {!isActive && (
                   <motion.div
@@ -137,14 +141,15 @@ export default function Navigation() {
         </div>
         <Link
           href="/countdown"
-          className={`flex items-center justify-center uppercase tabular-nums font-normal transition-colors min-h-[44px] ${
+          className={`flex items-center justify-center uppercase tabular-nums font-normal transition-colors min-h-8 md:min-h-11 font-(family-name:--font-ibm-plex-mono) ${
             pathname === "/countdown"
               ? "bg-white text-black"
               : "bg-[#242424]/70 text-[#707070] hover:text-white"
           }`}
           style={{
-            padding: "clamp(0.3rem, 0.4vw, 0.5rem) clamp(0.6rem, 1.4vw, 1.6rem)",
-            fontSize: "clamp(0.5625rem, 0.968vw, 1.125rem)",
+            padding:
+              "clamp(0.2rem, 0.4vw, 0.5rem) clamp(0.5rem, 1.4vw, 1.6rem)",
+            fontSize: "clamp(0.6875rem, 0.968vw, 1.125rem)",
             letterSpacing: "-0.02em",
             lineHeight: "1.54",
             borderRadius: "clamp(6px, 0.764vw, 12px)",

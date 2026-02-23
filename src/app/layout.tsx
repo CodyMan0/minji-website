@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans_Condensed } from "next/font/google";
+import { IBM_Plex_Sans_Condensed, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
 const ibmPlex = IBM_Plex_Sans_Condensed({
   subsets: ["latin"],
   weight: ["300", "400", "500", "700"],
   variable: "--font-ibm-plex",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-ibm-plex-mono",
 });
 
 export const viewport = {
@@ -35,7 +41,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body
-        className={`${ibmPlex.variable} ${ibmPlex.className} antialiased bg-black`}
+        className={`${ibmPlex.variable} ${ibmPlexMono.variable} ${ibmPlex.className} antialiased bg-black`}
       >
         {children}
       </body>

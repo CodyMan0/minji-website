@@ -16,10 +16,9 @@ export default function CountdownPage() {
 
   const unlocked = isExpired;
 
-  const totalHours = days * 24 + hours;
   const display = unlocked
-    ? "00:00:00 (KST)"
-    : `${padTwo(totalHours)}:${padTwo(minutes)}:${padTwo(seconds)} (KST)`;
+    ? "00D : 00H : 00M (KST)"
+    : `${padTwo(days)}D:${padTwo(hours)}H:${padTwo(minutes)}M (KST)`;
 
   const revealMessage = unlocked
     ? "THE ANSWER IS HERE"

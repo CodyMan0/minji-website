@@ -8,7 +8,7 @@ import { useDebugDate } from "@/contexts/DebugDateContext";
 import { padTwo } from "@/lib/format";
 import { useCallback, useEffect, useRef, useState } from "react";
 const tabs = [
-  { href: "/exhibition", label: "EXHIBITION" },
+  { href: "/exhibition", label: "THE ART OF LIGHT" },
   { href: "/gallery", label: "OVERVIEW" },
   { href: "/master", label: "MASTER PHOTOGRAPHER JDZ" },
 ];
@@ -20,8 +20,7 @@ interface TabRect {
 
 export default function Navigation() {
   const { adjustedDate } = useDebugDate();
-  const { days, hours, minutes, seconds, isExpired } =
-    useCountdown(adjustedDate);
+  const { days, hours, minutes, isExpired } = useCountdown(adjustedDate);
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
@@ -53,10 +52,9 @@ export default function Navigation() {
     return () => window.removeEventListener("resize", measureActiveTab);
   }, [measureActiveTab]);
 
-  const totalHours = days * 24 + hours;
   const countdown = isExpired
     ? "LIVE"
-    : `${padTwo(totalHours)}:${padTwo(minutes)}:${padTwo(seconds)} (KST)`;
+    : `${padTwo(days)}D:${padTwo(hours)}H:${padTwo(minutes)}M (KST)`;
 
   return (
     <motion.nav

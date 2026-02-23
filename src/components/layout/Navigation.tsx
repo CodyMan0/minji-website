@@ -7,8 +7,6 @@ import { useCountdown } from "@/hooks/useCountdown";
 import { useDebugDate } from "@/contexts/DebugDateContext";
 import { padTwo } from "@/lib/format";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useIsMobile } from "@/hooks/useIsMobile";
-
 const tabs = [
   { href: "/exhibition", label: "EXHIBITION" },
   { href: "/gallery", label: "OVERVIEW" },
@@ -28,7 +26,6 @@ export default function Navigation() {
   const containerRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [activeRect, setActiveRect] = useState<TabRect | null>(null);
-  const isMobile = useIsMobile();
 
   const activeIndex = tabs.findIndex(
     (tab) =>

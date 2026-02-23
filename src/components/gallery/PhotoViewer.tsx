@@ -167,7 +167,6 @@ export default function PhotoViewer({
       <AnimatePresence mode="popLayout" custom={direction}>
         {photo && (
           <motion.div
-            ref={viewerRef}
             key={photo.id}
             custom={direction}
             variants={variants}
@@ -182,6 +181,7 @@ export default function PhotoViewer({
             }
           >
             <div
+              ref={viewerRef}
               className="flex flex-col items-center cursor-default pointer-events-auto"
               onClick={(e) => e.stopPropagation()}
             >

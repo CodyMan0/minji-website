@@ -46,7 +46,7 @@ function TypingTextSection() {
   return (
     <section
       ref={sectionRef}
-      className="h-dvh flex flex-col items-center justify-center gap-3 px-8"
+      className="relative h-dvh flex flex-col items-center justify-center gap-3 px-8"
     >
       <p
         className="uppercase text-center text-white flex items-center justify-center"
@@ -74,24 +74,28 @@ function TypingTextSection() {
           <span className="inline-block w-[0.5em] h-[0.7em] bg-white ml-[0.1em] animate-blink" />
         )}
       </p>
-    </section>
-  );
-}
 
-function BackToTopButton() {
-  return (
-    <section className="pb-16 md:pb-32 flex flex-col items-center justify-center gap-6">
+      {/* Back to top — absolute bottom */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className="flex flex-col items-center gap-6 cursor-pointer group"
+        className="absolute bottom-[25%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 cursor-pointer group"
       >
-        <div className="w-10 h-10 rounded-sm bg-white/10 flex items-center justify-center transition-colors group-hover:bg-white">
+        <div
+          className="flex items-center justify-center bg-white/10 transition-colors group-hover:bg-white"
+          style={{
+            width: "clamp(2rem, 3.6vw, 2.6rem)",
+            height: "clamp(2rem, 3.6vw, 2.6rem)",
+            borderRadius: "clamp(4px, 0.16vw, 6px)",
+          }}
+        >
           <svg
-            width="24"
-            height="24"
             viewBox="0 0 24 24"
             fill="none"
             className="text-white group-hover:text-black transition-colors"
+            style={{
+              width: "clamp(1rem, 1.5vw, 1.3rem)",
+              height: "clamp(1rem, 1.5vw, 1.3rem)",
+            }}
           >
             <path
               d="M12 20V4M12 4L5 11M12 4L19 11"
@@ -102,7 +106,10 @@ function BackToTopButton() {
             />
           </svg>
         </div>
-        <span className="text-xs uppercase tracking-[0.2em] text-white font-light">
+        <span
+          className="uppercase text-white tracking-[-0.02em]"
+          style={{ fontSize: "clamp(0.6rem, 1.05vw, 0.85rem)" }}
+        >
           BACK TO TOP
         </span>
       </button>
@@ -179,8 +186,6 @@ export default function GalleryPage() {
 
       {/* Text Section */}
       <TypingTextSection />
-
-      <BackToTopButton />
 
       <PhotoViewer
         photo={selectedPhoto}

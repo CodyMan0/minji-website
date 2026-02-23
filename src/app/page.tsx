@@ -9,14 +9,12 @@ import { photos } from "@/lib/photos";
 
 type Phase = "star" | "text";
 
-/** Star reveal total duration in seconds */
 const STAR_REVEAL_DURATION = 3.5;
 
 export default function LoadingPage() {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("star");
   const [shouldSkip, setShouldSkip] = useState(false);
-  // Preload exhibition photos during loading animation
   useEffect(() => {
     photos.forEach((photo) => {
       const img = new window.Image();
@@ -24,7 +22,6 @@ export default function LoadingPage() {
     });
   }, []);
 
-  // Check if loading should be shown (only on refresh or direct / navigation)
   useEffect(() => {
     const navEntries = performance.getEntriesByType(
       "navigation",
@@ -43,19 +40,16 @@ export default function LoadingPage() {
     }
   }, [router]);
 
-  // Typewriter only starts when phase is "text"
   const { displayText, isComplete } = useTypewriter(
     "THE ART OF LIGHT",
     120,
     phase === "text" ? 0 : 999999,
   );
 
-  // Star reveal complete → immediately transition to text
   const handleStarComplete = () => {
     if (phase === "star") setPhase("text");
   };
 
-  // When typewriter completes, auto-navigate after delay
   useEffect(() => {
     if (phase === "text" && isComplete) {
       const timeout = setTimeout(() => {
@@ -73,7 +67,6 @@ export default function LoadingPage() {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center overflow-hidden">
       <AnimatePresence mode="wait">
-        {/* Phase 1: Star — bottom-to-top clipPath reveal (matches loading page.mp4) */}
         {phase === "star" && (
           <motion.div
             key="star"
@@ -81,13 +74,13 @@ export default function LoadingPage() {
             initial={{ clipPath: "inset(100% 0 0 0)", opacity: 0 }}
             animate={{
               clipPath: [
-                "inset(100% 0 0 0)", // start: hidden
-                "inset(45% 0 0 0)", // 55% revealed — fast
-                "inset(45% 0 0 0)", // pause at 55%
-                "inset(30% 0 0 0)", // 70% revealed — fast
-                "inset(30% 0 0 0)", // pause at 70%
-                "inset(10% 0 0 0)", // 100% revealed — snap
-                "inset(10% 0 0 0)", // hold at 100%
+                "inset(100% 0 0 0)",
+                "inset(45% 0 0 0)",
+                "inset(45% 0 0 0)",
+                "inset(30% 0 0 0)",
+                "inset(30% 0 0 0)",
+                "inset(10% 0 0 0)",
+                "inset(10% 0 0 0)",
               ],
               opacity: [0, 1, 1, 1, 1, 1, 1],
             }}
@@ -109,7 +102,6 @@ export default function LoadingPage() {
           </motion.div>
         )}
 
-        {/* Phase 2: Text content */}
         {phase === "text" && (
           <motion.div
             key="text"

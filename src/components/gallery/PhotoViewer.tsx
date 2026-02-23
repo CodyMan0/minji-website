@@ -14,7 +14,6 @@ interface PhotoViewerProps {
 
 const WHEEL_COOLDOWN_MS = 600;
 
-/** Match the card's 3D rotation for open/close transition */
 const CARD_ROTATE_X = -10;
 const CARD_ROTATE_Y = -18;
 const CARD_ROTATE_Z = 2;
@@ -68,7 +67,6 @@ export default function PhotoViewer({
     [onNavigate],
   );
 
-  // Full-screen swipe for mobile navigation
   useEffect(() => {
     if (!photo) return;
     let startX = 0;
@@ -124,7 +122,6 @@ export default function PhotoViewer({
     [onNavigate, navigateWithDirection],
   );
 
-  // Reset isNavigating when viewer closes
   useEffect(() => {
     if (!photo) {
       isNavigating.current = false;
@@ -151,7 +148,6 @@ export default function PhotoViewer({
 
   return (
     <>
-      {/* Backdrop */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -181,7 +177,6 @@ export default function PhotoViewer({
         )}
       </AnimatePresence>
 
-      {/* Photo — custom direction ensures correct exit direction */}
       <AnimatePresence mode="popLayout" custom={direction}>
         {photo && (
           <motion.div

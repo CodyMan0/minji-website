@@ -76,7 +76,6 @@ export default function Navigation() {
             borderRadius: "clamp(6px, 0.764vw, 12px)",
           }}
         >
-          {/* Active indicator */}
           {activeRect && (
             <motion.div
               className="absolute bg-black"

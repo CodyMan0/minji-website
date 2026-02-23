@@ -57,7 +57,6 @@ export default function CountdownPage() {
           <span className="inline-block bg-white ml-[0.15em] w-[0.57em] h-[0.7em] animate-blink" />
         </p>
 
-        {/* Button — locked or unlocked state */}
         <div className="min-h-[2.5rem]">
         {unlocked ? (
           <motion.div

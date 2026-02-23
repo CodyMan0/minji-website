@@ -8,7 +8,6 @@ import type { Photo } from "@/lib/photos";
 import PhotoViewer from "@/components/gallery/PhotoViewer";
 import { useTypewriter } from "@/hooks/useTypewriter";
 
-// Repeating aspect ratio pattern for visual variety
 const ASPECT_PATTERNS = [
   [
     "aspect-[4/3]",
@@ -75,7 +74,6 @@ function TypingTextSection() {
         )}
       </p>
 
-      {/* Back to top — absolute bottom */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         className="absolute bottom-[25%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 cursor-pointer group"
@@ -184,7 +182,6 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      {/* Text Section */}
       <TypingTextSection />
 
       <PhotoViewer

@@ -13,7 +13,6 @@ import type { Photo } from "@/lib/photos";
 import PhotoViewer from "@/components/gallery/PhotoViewer";
 import { padTwo } from "@/lib/format";
 
-/** Layout: photos arranged diagonally bottom-left → top-right */
 const DIAGONAL_X_STEP = 8;
 const DIAGONAL_Y_STEP = -5.5;
 const PHOTO_ROTATE_X = 2;
@@ -25,11 +24,9 @@ const LERP_FACTOR_MIN = 0.04;
 const LERP_FACTOR_MAX = 0.15;
 const X_OFFSET = 5;
 
-/** Base size for the longer side of each card (desktop / mobile) */
 const CARD_BASE_VW = 28;
 const CARD_BASE_VW_MOBILE = 44;
 
-/** Entrance: gallery starts at photo 1, overshoots center, then bounces back */
 const ENTRANCE_TARGET = 25;
 const ENTRANCE_OVERSHOOT = 2;
 
@@ -43,7 +40,6 @@ function getCardSize(w: number, h: number, base: number): { width: string; heigh
   return { width: `${wVw}vw`, height: `${base}vw` };
 }
 
-/** Calculate the scroll progress needed to center a photo by index */
 function getProgressForIndex(index: number): number {
   const targetX = index * DIAGONAL_X_STEP + X_OFFSET;
   const centerOffset = 20;
@@ -69,7 +65,6 @@ export default function ExhibitionPage() {
   );
   const cardBase = isMobile ? CARD_BASE_VW_MOBILE : CARD_BASE_VW;
 
-  // SSR-safe mounted check
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -82,13 +77,11 @@ export default function ExhibitionPage() {
   const selectedPhoto: Photo | null =
     selectedIndex !== null ? photos[selectedIndex] : null;
 
-  // Smooth diagonal scroll with lerp + entrance bounce
   useEffect(() => {
     const animate = () => {
       setScrollProgress((prev) => {
         const diff = targetProgress.current - prev;
 
-        // Entrance bounce: overshoot then bounce back behind target
         if (
           !hasBounced.current &&
           prev >= ENTRANCE_TARGET &&
@@ -99,7 +92,6 @@ export default function ExhibitionPage() {
         }
 
         if (Math.abs(diff) < 0.01) return targetProgress.current;
-        // Fast when far, chewy/sticky when close
         const t = Math.min(Math.abs(diff) / 20, 1);
         const factor =
           LERP_FACTOR_MIN + t * (LERP_FACTOR_MAX - LERP_FACTOR_MIN);
@@ -114,7 +106,6 @@ export default function ExhibitionPage() {
     };
   }, []);
 
-  // Wheel: scroll along the diagonal axis (only when viewer is closed)
   useEffect(() => {
     const el = containerRef.current;
     if (!el || selectedIndex !== null) return;
@@ -133,7 +124,6 @@ export default function ExhibitionPage() {
     return () => el.removeEventListener("wheel", handleWheel);
   }, [maxProgress, selectedIndex]);
 
-  // Touch: drag along the diagonal axis (only when viewer is closed)
   useEffect(() => {
     const el = containerRef.current;
     if (!el || selectedIndex !== null) return;
@@ -168,7 +158,6 @@ export default function ExhibitionPage() {
   const scrollToPhoto = useCallback(
     (index: number) => {
       const progress = getProgressForIndex(index);
-      // Find the closest cycle occurrence of this photo
       const current = targetProgress.current;
       const cycle = Math.round((current - progress) / totalCycle);
       targetProgress.current = cycle * totalCycle + progress;
@@ -203,10 +192,8 @@ export default function ExhibitionPage() {
 
   const yRatio = DIAGONAL_Y_STEP / DIAGONAL_X_STEP;
 
-  // Current cycle for rendering 3 seamless sets
   const currentCycle = Math.floor(scrollProgress / totalCycle);
 
-  // Card counter uses wrapped progress
   const wrappedProgress =
     ((scrollProgress % totalCycle) + totalCycle) % totalCycle;
   const currentIndex = Math.min(
@@ -216,13 +203,11 @@ export default function ExhibitionPage() {
 
   return (
     <>
-      {/* Fixed viewport container */}
       <div
         ref={containerRef}
         className="fixed inset-0 overflow-hidden"
         style={{ perspective: "1200px", zIndex: 1 }}
       >
-        {/* Diagonal photo strip — 3 dynamic sets for seamless loop */}
         <div
           className="absolute w-full h-full"
           style={{
@@ -263,7 +248,6 @@ export default function ExhibitionPage() {
                   onMouseLeave={() => setHoveredIndex(null)}
                   onClick={() => handlePhotoClick(i)}
                 >
-                  {/* Front face — glass frame */}
                   <div
                     className="absolute inset-0 overflow-hidden bg-zinc-900"
                     style={{
@@ -288,7 +272,6 @@ export default function ExhibitionPage() {
                       sizes="(max-width: 768px) 70vw, 32vw"
                       priority={i < 6}
                     />
-                    {/* Glass reflection */}
                     <div
                       className="absolute inset-0 pointer-events-none"
                       style={{
@@ -296,14 +279,12 @@ export default function ExhibitionPage() {
                           "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.04) 100%)",
                       }}
                     />
-                    {/* Glass border highlight */}
                     <div
                       className="absolute inset-0 pointer-events-none"
                       style={{ border: "1px solid rgba(255,255,255,0.08)" }}
                     />
                   </div>
 
-                  {/* Right edge — glass */}
                   <div
                     className="absolute top-0"
                     style={{
@@ -317,7 +298,6 @@ export default function ExhibitionPage() {
                     }}
                   />
 
-                  {/* Bottom edge — glass */}
                   <div
                     className="absolute left-0"
                     style={{
@@ -336,7 +316,6 @@ export default function ExhibitionPage() {
           )}
         </div>
 
-        {/* Card counter */}
         <div className="fixed bottom-4 right-8 z-50 text-[10px] uppercase tracking-widest text-zinc-600 font-light">
           {padTwo(currentIndex + 1)} / {padTwo(photos.length)}
         </div>

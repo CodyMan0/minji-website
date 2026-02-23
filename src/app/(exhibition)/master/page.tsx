@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { ARTIST } from "@/lib/constants";
 
-/* ── Intro animation timing (seconds) ── */
 const SQUARE1_APPEAR = 0.3;
 const BLINK_START = 0.4;
 const BLINK_DURATION = 0.1;
@@ -15,7 +14,7 @@ const CONTENT_FADE_IN = SQUARE3_APPEAR + 0.8;
 
 const WHEEL_THRESHOLD = 50;
 const MAX_STEP = 2;
-const STEP_OFFSETS = [0, 0, 30]; // dvh units per step
+const STEP_OFFSETS = [0, 0, 30];
 
 export default function MasterPage() {
   const [phase, setPhase] = useState(0);
@@ -66,7 +65,6 @@ export default function MasterPage() {
     return () => window.removeEventListener("wheel", handleWheel);
   }, [phase, goStep]);
 
-  // Touch: swipe up/down for section transitions
   useEffect(() => {
     if (phase < 4) return;
 
@@ -101,15 +99,12 @@ export default function MasterPage() {
 
   return (
     <div className="relative h-[calc(100dvh-5rem)] overflow-hidden text-white">
-      {/* ── Single sliding container: everything moves together ── */}
       <motion.div
         className="relative h-full px-[5%]"
         animate={{ y: `-${slideOffset}dvh` }}
         transition={{ duration: 1, ease: [0.33, 1, 0.68, 1] }}
       >
-        {/* Three squares — aligned with content margins */}
         <div className="absolute inset-0 pointer-events-none z-20 mx-[5%]">
-          {/* Square 1 — left edge aligned with content */}
           <motion.span
             className="absolute w-[clamp(8px,0.7vw,10px)] h-[clamp(8px,0.7vw,10px)] bg-white"
             style={{ left: "0%" }}
@@ -138,7 +133,6 @@ export default function MasterPage() {
                     }
             }
           />
-          {/* Square 2 */}
           <motion.span
             className="absolute w-[clamp(8px,0.7vw,10px)] h-[clamp(8px,0.7vw,10px)] bg-white"
             initial={{ opacity: 0, left: "0%", top: "calc(50% - 2.5rem)" }}
@@ -155,7 +149,6 @@ export default function MasterPage() {
                 : { duration: 0.5, ease: "easeOut" }
             }
           />
-          {/* Square 3 — right edge aligned with content */}
           <motion.span
             className="absolute w-[clamp(8px,0.7vw,10px)] h-[clamp(8px,0.7vw,10px)] bg-white"
             initial={{ opacity: 0, left: "19%", top: "calc(50% - 2.5rem)" }}
@@ -182,7 +175,6 @@ export default function MasterPage() {
           />
         </div>
 
-        {/* Hero: title + bio */}
         <motion.div
           className="relative z-10"
           style={{ paddingTop: "calc(50dvh - 4rem + 2rem)" }}
@@ -198,7 +190,6 @@ export default function MasterPage() {
           </p>
         </motion.div>
 
-        {/* 01 ABOUT */}
         <motion.div
           className="relative z-10 mt-[4dvh]"
           initial={{ opacity: 0, y: 20 }}
@@ -218,7 +209,6 @@ export default function MasterPage() {
           </p>
         </motion.div>
 
-        {/* 02 PHILOSOPHY */}
         <motion.div
           className="relative z-10 mt-[4dvh]"
           initial={{ opacity: 0, y: 20 }}

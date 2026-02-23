@@ -176,13 +176,12 @@ export default function MasterPage() {
         </div>
 
         <motion.div
-          className="relative z-10"
-          style={{ paddingTop: "calc(22% + 65px)" }}
+          className="relative z-10 pt-[calc(50dvh-70px)] md:pt-[calc(22%+65px)]"
           initial={{ opacity: 0, y: 20 }}
           animate={phase >= 4 ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          <h1 className="text-[clamp(1.2rem,1.75vw,2rem)] font-normal mb-5 leading-[1.54] tracking-[-0.02em]">
+          <h1 className="text-[clamp(1.2rem,1.75vw,2rem)] font-normal mb-3 md:mb-5 leading-[1.54] tracking-[-0.02em]">
             마스터 포토그래퍼 JDZ
           </h1>
           <p className="text-[clamp(0.7rem,1.18vw,1.1rem)] leading-[1.64] tracking-[-0.02em] text-white max-w-3xl whitespace-pre-line">
@@ -191,12 +190,12 @@ export default function MasterPage() {
         </motion.div>
 
         <motion.div
-          className="relative z-10 mt-[9dvh]"
+          className="relative z-10 mt-[4dvh] md:mt-[9dvh]"
           initial={{ opacity: 0, y: 20 }}
           animate={step >= 1 ? { opacity: 0.7, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <div className="flex items-end gap-[16%] mb-8">
+          <div className="flex items-end gap-[16%] mb-4 md:mb-8">
             <p className="text-[clamp(0.8rem,1.3vw,1.2rem)] font-normal leading-[1.54] tracking-[-0.02em]">
               01
             </p>
@@ -210,12 +209,12 @@ export default function MasterPage() {
         </motion.div>
 
         <motion.div
-          className="relative z-10 mt-[4dvh]"
+          className="relative z-10 mt-[2dvh] md:mt-[4dvh]"
           initial={{ opacity: 0, y: 20 }}
           animate={step >= 2 ? { opacity: 0.7, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <div className="flex items-end gap-[16%] mb-8">
+          <div className="flex items-end gap-[16%] mb-4 md:mb-8">
             <p className="text-[clamp(0.8rem,1.3vw,1.2rem)] font-normal leading-[1.54] tracking-[-0.02em]">
               02
             </p>

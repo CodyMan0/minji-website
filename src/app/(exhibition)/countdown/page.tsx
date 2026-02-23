@@ -42,22 +42,22 @@ export default function CountdownPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="fixed inset-0 flex flex-col items-center justify-center gap-[clamp(0.5rem,1vw,1rem)] select-none overflow-hidden"
+        className="fixed inset-0 flex flex-col items-center justify-center select-none overflow-hidden"
       >
-        <p className="text-white uppercase pb-4 md:pb-10 text-[clamp(0.875rem,1.2vw,1.5rem)] leading-[1.54] tracking-[-0.02em] px-4 text-center">
+        <p className="text-white uppercase text-[clamp(0.875rem,1.23vw,22.5px)] leading-[1.54] tracking-[-0.02em] px-4 text-center">
           WHAT DO YOU THINK IT WAS SHOT ON?
         </p>
 
-        <h1 className="font-normal text-white uppercase tabular-nums text-[clamp(2.5rem,10vw,8rem)] leading-none tracking-[-0.02em]">
+        <h1 className="font-normal text-white uppercase tabular-nums text-[clamp(2.5rem,6.93vw,127px)] leading-[1.54] tracking-[-0.02em]">
           {display}
         </h1>
 
-        <p className="text-white uppercase flex items-center text-[clamp(0.875rem,1.2vw,1.5rem)] leading-[1.54] tracking-[-0.02em] min-h-[1.6em]">
+        <p className="text-white uppercase flex items-center text-[clamp(0.875rem,1.23vw,22.5px)] leading-[1.54] tracking-[-0.02em] min-h-[1.6em]">
           {revealText}
           <span className="inline-block bg-white ml-[0.15em] w-[0.57em] h-[0.7em] animate-blink" />
         </p>
 
-        <div className="min-h-[2.5rem]">
+        <div className="mt-[20px] min-h-[2.5rem]">
         {unlocked ? (
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -71,7 +71,7 @@ export default function CountdownPage() {
               ],
             }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="rounded-xl"
+            className="rounded-[11px]"
           >
             <motion.div
               animate={{
@@ -83,13 +83,13 @@ export default function CountdownPage() {
                 ],
               }}
               transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-              className="rounded-xl"
+              className="rounded-[11px]"
             >
               <a
                 href="https://sgp-api.buy.mi.com/i18n_op/opx/kr/product-station/preview/kr/event/2026/xiaomi-launch-february-2026?id=9837344#"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="pl-2 pr-4 flex items-center bg-white rounded-xl"
+                className="pl-2 pr-4 flex items-center bg-white rounded-[11px]"
                 onClick={() => track("reveal_button_click")}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -108,7 +108,7 @@ export default function CountdownPage() {
           <motion.div animate={shakeControls}>
             <button
               onClick={handleLockedClick}
-              className="pl-2 pr-4 flex items-center bg-[#737373] rounded-md cursor-not-allowed select-none"
+              className="pl-2 pr-4 flex items-center bg-[#737373] rounded-[11px] cursor-not-allowed select-none"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img

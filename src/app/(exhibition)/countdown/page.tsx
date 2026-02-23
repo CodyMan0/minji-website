@@ -44,7 +44,7 @@ export default function CountdownPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="fixed inset-0 flex flex-col items-center justify-center gap-[1vw] select-none overflow-hidden"
+      className="fixed inset-0 flex flex-col items-center justify-center gap-[clamp(0.5rem,1vw,1rem)] select-none overflow-hidden"
     >
       <p className="text-white uppercase pb-10 text-[clamp(0.75rem,1.2vw,1.5rem)] leading-[1.54] tracking-[-0.02em]">
         WHAT DO YOU THINK IT WAS SHOT ON?

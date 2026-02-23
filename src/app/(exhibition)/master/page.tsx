@@ -70,6 +70,45 @@ export default function MasterPage() {
     return () => window.removeEventListener("wheel", handleWheel);
   }, [phase, goStep]);
 
+  // Touch: swipe up/down for section transitions
+  useEffect(() => {
+    if (phase < 4) return;
+
+    let touchStartY = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const dy = touchStartY - e.changedTouches[0].clientY;
+      if (Math.abs(dy) < 50) return;
+
+      if (dy > 0) {
+        // Swipe up → next section
+        setStep((prev) => {
+          const next = Math.min(prev + 1, SCROLL_STEPS.length - 1);
+          if (next !== prev) goStep(next);
+          return prev;
+        });
+      } else {
+        // Swipe down → prev section
+        setStep((prev) => {
+          const next = Math.max(prev - 1, 0);
+          if (next !== prev) goStep(next);
+          return prev;
+        });
+      }
+    };
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [phase, goStep]);
+
   const translateY = SCROLL_STEPS[step];
 
   return (
@@ -94,7 +133,7 @@ export default function MasterPage() {
       {/* Three squares — fixed position */}
       <div className="absolute inset-0 pointer-events-none z-20">
         <motion.span
-          className="absolute w-[10px] h-[10px] bg-white"
+          className="absolute w-[clamp(8px,0.7vw,10px)] h-[clamp(8px,0.7vw,10px)] bg-white"
           style={{ left: "5%", top: "15%" }}
           initial={{ opacity: 0 }}
           animate={
@@ -115,7 +154,7 @@ export default function MasterPage() {
           }
         />
         <motion.span
-          className="absolute w-[10px] h-[10px] bg-white"
+          className="absolute w-[clamp(8px,0.7vw,10px)] h-[clamp(8px,0.7vw,10px)] bg-white"
           style={{ top: "15%" }}
           initial={{ opacity: 0, left: "5%" }}
           animate={
@@ -126,7 +165,7 @@ export default function MasterPage() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         />
         <motion.span
-          className="absolute w-[10px] h-[10px] bg-white"
+          className="absolute w-[clamp(8px,0.7vw,10px)] h-[clamp(8px,0.7vw,10px)] bg-white"
           style={{ top: "15%" }}
           initial={{ opacity: 0, left: "28%" }}
           animate={
@@ -164,7 +203,7 @@ export default function MasterPage() {
         {/* 01 ABOUT */}
         <div className="h-[calc(100dvh-5rem)] flex flex-col justify-center">
           <div>
-            <div className="flex items-end gap-20 mb-6">
+            <div className="flex items-end gap-6 md:gap-20 mb-6">
               <p className="text-[clamp(1.2rem,2vw,2rem)] font-light">01</p>
               <p className="text-[clamp(1.2rem,2vw,2rem)] font-light uppercase tracking-wider">
                 ABOUT
@@ -179,7 +218,7 @@ export default function MasterPage() {
         {/* 02 PHILOSOPHY */}
         <div className="h-[calc(100dvh-5rem)] flex flex-col justify-center">
           <div>
-            <div className="flex items-end gap-20 mb-6">
+            <div className="flex items-end gap-6 md:gap-20 mb-6">
               <p className="text-[clamp(1.2rem,2vw,2rem)] font-light">02</p>
               <p className="text-[clamp(1.2rem,2vw,2rem)] font-light uppercase tracking-wider">
                 PHILOSOPHY

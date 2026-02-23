@@ -80,7 +80,7 @@ function TypingTextSection() {
 
 function BackToTopButton() {
   return (
-    <section className="pb-32 flex flex-col items-center justify-center gap-6">
+    <section className="pb-16 md:pb-32 flex flex-col items-center justify-center gap-6">
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         className="flex flex-col items-center gap-6 cursor-pointer group"
@@ -168,7 +168,7 @@ export default function GalleryPage() {
                     sizes="(max-width: 768px) 50vw, 20vw"
                   />
                 </div>
-                <p className="mt-2 text-[11px] uppercase tracking-[0.07em] text-[#52525d] group-hover:text-zinc-400 transition-colors">
+                <p className="mt-2 text-[10px] md:text-[11px] uppercase tracking-[0.07em] text-[#52525d] group-hover:text-zinc-400 transition-colors">
                   {photo.id}
                 </p>
               </motion.div>

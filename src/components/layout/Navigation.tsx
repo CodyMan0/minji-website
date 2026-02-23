@@ -7,11 +7,12 @@ import { useCountdown } from "@/hooks/useCountdown";
 import { useDebugDate } from "@/contexts/DebugDateContext";
 import { padTwo } from "@/lib/format";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 const tabs = [
-  { href: "/exhibition", label: "THE ART OF LIGHT" },
-  { href: "/gallery", label: "OVERVIEW" },
-  { href: "/master", label: "MASTER PHOTOGRAPHER JDZ" },
+  { href: "/exhibition", label: "THE ART OF LIGHT", mobileLabel: "EXHIBITION" },
+  { href: "/gallery", label: "OVERVIEW", mobileLabel: "OVERVIEW" },
+  { href: "/master", label: "MASTER PHOTOGRAPHER JDZ", mobileLabel: "JDZ" },
 ];
 
 interface TabRect {
@@ -27,6 +28,7 @@ export default function Navigation() {
   const containerRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [activeRect, setActiveRect] = useState<TabRect | null>(null);
+  const isMobile = useIsMobile();
 
   const activeIndex = tabs.findIndex(
     (tab) =>
@@ -62,16 +64,16 @@ export default function Navigation() {
   return (
     <motion.nav
       className="fixed top-0 left-0 right-0 z-50"
-      style={{ padding: "1.22vw 1.33vw 0" }}
+      style={{ padding: "clamp(0.5rem, 1.22vw, 1.22vw) clamp(0.5rem, 1.33vw, 1.33vw) 0" }}
     >
       <div className="flex items-center justify-between">
         <div
           ref={containerRef}
           className="relative flex items-center bg-[#242424]"
           style={{
-            padding: "0.23vw 0.29vw",
-            gap: "0.29vw",
-            borderRadius: "0.764vw",
+            padding: "clamp(2px, 0.23vw, 4px) clamp(3px, 0.29vw, 5px)",
+            gap: "clamp(2px, 0.29vw, 5px)",
+            borderRadius: "clamp(6px, 0.764vw, 12px)",
           }}
         >
           {/* Active indicator */}
@@ -79,9 +81,9 @@ export default function Navigation() {
             <motion.div
               className="absolute bg-black"
               style={{
-                borderRadius: "0.634vw",
-                top: "0.23vw",
-                bottom: "0.23vw",
+                borderRadius: "clamp(5px, 0.634vw, 10px)",
+                top: "clamp(2px, 0.23vw, 4px)",
+                bottom: "clamp(2px, 0.23vw, 4px)",
               }}
               animate={{
                 left: activeRect.left,
@@ -104,10 +106,10 @@ export default function Navigation() {
                 ref={(el) => {
                   tabRefs.current[i] = el;
                 }}
-                className="relative flex items-center justify-center uppercase font-normal"
+                className="relative flex items-center justify-center uppercase font-normal min-h-[44px]"
                 style={{
-                  borderRadius: "0.634vw",
-                  padding: "0.3vw 2.2vw",
+                  borderRadius: "clamp(5px, 0.634vw, 10px)",
+                  padding: "clamp(0.3rem, 0.3vw, 0.5rem) clamp(0.6rem, 2.2vw, 2.5rem)",
                   fontSize: "clamp(0.5625rem, 0.968vw, 1.125rem)",
                   letterSpacing: "-0.02em",
                   lineHeight: "1.54",
@@ -120,12 +122,12 @@ export default function Navigation() {
                       : "text-[#707070] hover:text-zinc-200"
                   }`}
                 >
-                  {tab.label}
+                  {isMobile ? tab.mobileLabel : tab.label}
                 </span>
                 {!isActive && (
                   <motion.div
                     className="absolute inset-0 bg-white/0"
-                    style={{ borderRadius: "0.634vw" }}
+                    style={{ borderRadius: "clamp(5px, 0.634vw, 10px)" }}
                     transition={{ duration: 0.004 }}
                   />
                 )}
@@ -135,17 +137,17 @@ export default function Navigation() {
         </div>
         <Link
           href="/countdown"
-          className={`flex items-center justify-center uppercase tabular-nums font-normal transition-colors ${
+          className={`flex items-center justify-center uppercase tabular-nums font-normal transition-colors min-h-[44px] ${
             pathname === "/countdown"
               ? "bg-white text-black"
               : "bg-[#242424]/70 text-[#707070] hover:text-white"
           }`}
           style={{
-            padding: "0.4vw 1.4vw",
+            padding: "clamp(0.3rem, 0.4vw, 0.5rem) clamp(0.6rem, 1.4vw, 1.6rem)",
             fontSize: "clamp(0.5625rem, 0.968vw, 1.125rem)",
             letterSpacing: "-0.02em",
             lineHeight: "1.54",
-            borderRadius: "0.764vw",
+            borderRadius: "clamp(6px, 0.764vw, 12px)",
           }}
         >
           {pathname === "/countdown"

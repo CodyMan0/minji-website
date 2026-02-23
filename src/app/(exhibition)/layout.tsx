@@ -12,7 +12,7 @@ export default function ExhibitionLayout({
   return (
     <DebugDateProvider>
       <Navigation />
-      <main className="pt-20">{children}</main>
+      <main className="pt-14 md:pt-20">{children}</main>
       <BottomBar />
     </DebugDateProvider>
   );

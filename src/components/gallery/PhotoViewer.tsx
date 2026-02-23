@@ -4,6 +4,8 @@ import Image from "next/image";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Photo } from "@/lib/photos";
+import { useSwipe } from "@/hooks/useSwipe";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface PhotoViewerProps {
   photo: Photo | null;
@@ -12,23 +14,11 @@ interface PhotoViewerProps {
 }
 
 const WHEEL_COOLDOWN_MS = 600;
-const SLIDE_OFFSET = "60vw";
 
 /** Match the card's 3D rotation for open/close transition */
 const CARD_ROTATE_X = -10;
 const CARD_ROTATE_Y = -18;
 const CARD_ROTATE_Z = 2;
-
-/** Slide variants using custom direction for correct exit direction */
-const slideVariants: Variants = {
-  enter: (dir: 1 | -1) => ({
-    x: dir === 1 ? SLIDE_OFFSET : `-${SLIDE_OFFSET}`,
-  }),
-  center: { x: 0 },
-  exit: (dir: 1 | -1) => ({
-    x: dir === 1 ? `-${SLIDE_OFFSET}` : SLIDE_OFFSET,
-  }),
-};
 
 const scaleVariants: Variants = {
   enter: {
@@ -56,6 +46,20 @@ export default function PhotoViewer({
   const wheelCooldown = useRef(false);
   const [direction, setDirection] = useState<1 | -1>(1);
   const isNavigating = useRef(false);
+  const isMobile = useIsMobile();
+  const viewerRef = useRef<HTMLDivElement>(null);
+
+  const slideOffset = isMobile ? "100vw" : "60vw";
+
+  const slideVariants: Variants = {
+    enter: (dir: 1 | -1) => ({
+      x: dir === 1 ? slideOffset : `-${slideOffset}`,
+    }),
+    center: { x: 0 },
+    exit: (dir: 1 | -1) => ({
+      x: dir === 1 ? `-${slideOffset}` : slideOffset,
+    }),
+  };
 
   const navigateWithDirection = useCallback(
     (dir: 1 | -1) => {
@@ -65,6 +69,11 @@ export default function PhotoViewer({
     },
     [onNavigate],
   );
+
+  useSwipe(viewerRef, {
+    onSwipeLeft: () => navigateWithDirection(1),
+    onSwipeRight: () => navigateWithDirection(-1),
+  });
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -137,12 +146,28 @@ export default function PhotoViewer({
             onClick={onClose}
           />
         )}
+        {isOpen && isMobile && (
+          <motion.button
+            key="close-btn"
+            className="fixed top-4 right-4 z-[70] w-10 h-10 flex items-center justify-center text-white/80"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </motion.button>
+        )}
       </AnimatePresence>
 
       {/* Photo — custom direction ensures correct exit direction */}
       <AnimatePresence mode="popLayout" custom={direction}>
         {photo && (
           <motion.div
+            ref={viewerRef}
             key={photo.id}
             custom={direction}
             variants={variants}
@@ -169,7 +194,7 @@ export default function PhotoViewer({
                 unoptimized
                 priority
               />
-              <p className="mt-3 text-xs uppercase tracking-widest text-zinc-500">
+              <p className="mt-3 text-[10px] md:text-xs uppercase tracking-widest text-zinc-500">
                 {photo.id}
               </p>
             </div>

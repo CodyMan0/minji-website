@@ -12,6 +12,7 @@ import { photos } from "@/lib/photos";
 import type { Photo } from "@/lib/photos";
 import PhotoViewer from "@/components/gallery/PhotoViewer";
 import { padTwo } from "@/lib/format";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 /** Layout: photos arranged diagonally bottom-left → top-right */
 const DIAGONAL_X_STEP = 8;
@@ -50,7 +51,72 @@ function getProgressForIndex(index: number): number {
   return Math.max(0, targetX - centerOffset);
 }
 
+function MobileGallery({
+  onPhotoClick,
+}: {
+  onPhotoClick: (index: number) => void;
+}) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      const scrollTop = el.scrollTop;
+      const itemHeight = el.clientHeight;
+      const index = Math.round(scrollTop / itemHeight);
+      setCurrentIndex(Math.min(index, photos.length - 1));
+    };
+
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-[1]">
+      <div
+        ref={scrollRef}
+        className="h-dvh overflow-y-auto snap-y snap-mandatory"
+      >
+        {photos.map((photo, i) => (
+          <div
+            key={photo.id}
+            className="h-dvh snap-start flex items-center justify-center px-[7.5vw] pt-14 pb-12"
+            onClick={() => onPhotoClick(i)}
+          >
+            <div className="relative w-[85vw] max-h-[70vh] overflow-hidden bg-zinc-900">
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                width={photo.width}
+                height={photo.height}
+                className="w-full h-auto object-contain"
+                sizes="85vw"
+                priority={i < 3}
+              />
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Card counter */}
+      <div className="fixed bottom-16 right-4 z-50 text-[10px] uppercase tracking-widest text-zinc-600 font-light">
+        {padTwo(currentIndex + 1)} / {padTwo(photos.length)}
+      </div>
+    </div>
+  );
+}
+
 export default function ExhibitionPage() {
+  const isMobile = useIsMobile();
   const [scrollProgress, setScrollProgress] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -168,129 +234,137 @@ export default function ExhibitionPage() {
 
   return (
     <>
-      {/* Fixed viewport container */}
-      <div
-        ref={containerRef}
-        className="fixed inset-0 overflow-hidden"
-        style={{ perspective: "1200px", zIndex: 1 }}
-      >
-        {/* Diagonal photo strip — 2 sets for seamless loop */}
-        <div
-          className="absolute w-full h-full"
-          style={{
-            transformStyle: "preserve-3d",
-            transform: `translate(${-wrappedProgress}vw, ${-wrappedProgress * yRatio}vw)`,
-            willChange: "transform",
-            opacity: mounted ? 1 : 0,
-          }}
-        >
-          {[0, 1].flatMap((set) =>
-            photos.map((photo, i) => {
-              const x = (i + set * photos.length) * DIAGONAL_X_STEP + X_OFFSET;
-              const y = (i + set * photos.length) * DIAGONAL_Y_STEP + Y_OFFSET;
-              const { width: cardW, height: cardH } = getCardSize(
-                photo.width,
-                photo.height,
-              );
+      {isMobile ? (
+        <MobileGallery onPhotoClick={handlePhotoClick} />
+      ) : (
+        <>
+          {/* Fixed viewport container */}
+          <div
+            ref={containerRef}
+            className="fixed inset-0 overflow-hidden"
+            style={{ perspective: "1200px", zIndex: 1 }}
+          >
+            {/* Diagonal photo strip — 2 sets for seamless loop */}
+            <div
+              className="absolute w-full h-full"
+              style={{
+                transformStyle: "preserve-3d",
+                transform: `translate(${-wrappedProgress}vw, ${-wrappedProgress * yRatio}vw)`,
+                willChange: "transform",
+                opacity: mounted ? 1 : 0,
+              }}
+            >
+              {[0, 1].flatMap((set) =>
+                photos.map((photo, i) => {
+                  const x =
+                    (i + set * photos.length) * DIAGONAL_X_STEP + X_OFFSET;
+                  const y =
+                    (i + set * photos.length) * DIAGONAL_Y_STEP + Y_OFFSET;
+                  const { width: cardW, height: cardH } = getCardSize(
+                    photo.width,
+                    photo.height,
+                  );
 
-              return (
-                <div
-                  key={`${set}-${photo.id}`}
-                  className="absolute cursor-pointer"
-                  style={{
-                    left: `${x}vw`,
-                    top: `${y}vw`,
-                    width: cardW,
-                    height: cardH,
-                    transformStyle: "preserve-3d",
-                    transform:
-                      hoveredIndex === i
-                        ? `rotateX(${PHOTO_ROTATE_X}deg) rotateY(${PHOTO_ROTATE_Y}deg) rotateZ(${PHOTO_ROTATE_Z}deg) translate(5vw, 1vw)`
-                        : `rotateX(${PHOTO_ROTATE_X}deg) rotateY(${PHOTO_ROTATE_Y}deg) rotateZ(${PHOTO_ROTATE_Z}deg) translate(0, 0)`,
-                    transition: "transform 0.25s ease-out",
-                  }}
-                  onMouseEnter={() => setHoveredIndex(i)}
-                  onMouseLeave={() => setHoveredIndex(null)}
-                  onClick={() => handlePhotoClick(i)}
-                >
-                  {/* Front face — glass frame */}
-                  <div
-                    className="absolute inset-0 overflow-hidden bg-zinc-900"
-                    style={{
-                      opacity: 0.92,
-                      backfaceVisibility: "hidden",
-                      boxShadow:
-                        hoveredIndex === i
-                          ? "0 35px 100px rgba(0,0,0,0.8), 0 15px 40px rgba(0,0,0,0.6), inset 0 0 30px rgba(255,255,255,0.05)"
-                          : "0 25px 80px rgba(0,0,0,0.7), 0 10px 30px rgba(0,0,0,0.5)",
-                      filter:
-                        hoveredIndex === i
-                          ? "brightness(1.1)"
-                          : "brightness(1)",
-                      transition: "filter 0.3s ease, box-shadow 0.4s ease",
-                    }}
-                  >
-                    <Image
-                      src={photo.src}
-                      alt={photo.alt}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 70vw, 32vw"
-                      priority={i < 6}
-                    />
-                    {/* Glass reflection */}
+                  return (
                     <div
-                      className="absolute inset-0 pointer-events-none"
+                      key={`${set}-${photo.id}`}
+                      className="absolute cursor-pointer"
                       style={{
-                        background:
-                          "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.04) 100%)",
+                        left: `${x}vw`,
+                        top: `${y}vw`,
+                        width: cardW,
+                        height: cardH,
+                        transformStyle: "preserve-3d",
+                        transform:
+                          hoveredIndex === i
+                            ? `rotateX(${PHOTO_ROTATE_X}deg) rotateY(${PHOTO_ROTATE_Y}deg) rotateZ(${PHOTO_ROTATE_Z}deg) translate(5vw, 1vw)`
+                            : `rotateX(${PHOTO_ROTATE_X}deg) rotateY(${PHOTO_ROTATE_Y}deg) rotateZ(${PHOTO_ROTATE_Z}deg) translate(0, 0)`,
+                        transition: "transform 0.25s ease-out",
                       }}
-                    />
-                    {/* Glass border highlight */}
-                    <div
-                      className="absolute inset-0 pointer-events-none"
-                      style={{ border: "1px solid rgba(255,255,255,0.08)" }}
-                    />
-                  </div>
+                      onMouseEnter={() => setHoveredIndex(i)}
+                      onMouseLeave={() => setHoveredIndex(null)}
+                      onClick={() => handlePhotoClick(i)}
+                    >
+                      {/* Front face — glass frame */}
+                      <div
+                        className="absolute inset-0 overflow-hidden bg-zinc-900"
+                        style={{
+                          opacity: 0.92,
+                          backfaceVisibility: "hidden",
+                          boxShadow:
+                            hoveredIndex === i
+                              ? "0 35px 100px rgba(0,0,0,0.8), 0 15px 40px rgba(0,0,0,0.6), inset 0 0 30px rgba(255,255,255,0.05)"
+                              : "0 25px 80px rgba(0,0,0,0.7), 0 10px 30px rgba(0,0,0,0.5)",
+                          filter:
+                            hoveredIndex === i
+                              ? "brightness(1.1)"
+                              : "brightness(1)",
+                          transition: "filter 0.3s ease, box-shadow 0.4s ease",
+                        }}
+                      >
+                        <Image
+                          src={photo.src}
+                          alt={photo.alt}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 70vw, 32vw"
+                          priority={i < 6}
+                        />
+                        {/* Glass reflection */}
+                        <div
+                          className="absolute inset-0 pointer-events-none"
+                          style={{
+                            background:
+                              "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.04) 100%)",
+                          }}
+                        />
+                        {/* Glass border highlight */}
+                        <div
+                          className="absolute inset-0 pointer-events-none"
+                          style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+                        />
+                      </div>
 
-                  {/* Right edge — glass */}
-                  <div
-                    className="absolute top-0"
-                    style={{
-                      width: EDGE_THICKNESS,
-                      height: "100%",
-                      right: 0,
-                      transform: `translateX(${EDGE_THICKNESS}px) rotateY(90deg)`,
-                      transformOrigin: "left center",
-                      background:
-                        "linear-gradient(to right, rgba(180,200,210,0.6), rgba(100,120,130,0.4))",
-                    }}
-                  />
+                      {/* Right edge — glass */}
+                      <div
+                        className="absolute top-0"
+                        style={{
+                          width: EDGE_THICKNESS,
+                          height: "100%",
+                          right: 0,
+                          transform: `translateX(${EDGE_THICKNESS}px) rotateY(90deg)`,
+                          transformOrigin: "left center",
+                          background:
+                            "linear-gradient(to right, rgba(180,200,210,0.6), rgba(100,120,130,0.4))",
+                        }}
+                      />
 
-                  {/* Bottom edge — glass */}
-                  <div
-                    className="absolute left-0"
-                    style={{
-                      width: "100%",
-                      height: EDGE_THICKNESS,
-                      bottom: 0,
-                      transform: `translateY(${EDGE_THICKNESS}px) rotateX(-90deg)`,
-                      transformOrigin: "top center",
-                      background:
-                        "linear-gradient(to bottom, rgba(160,180,190,0.5), rgba(80,100,110,0.3))",
-                    }}
-                  />
-                </div>
-              );
-            }),
-          )}
-        </div>
+                      {/* Bottom edge — glass */}
+                      <div
+                        className="absolute left-0"
+                        style={{
+                          width: "100%",
+                          height: EDGE_THICKNESS,
+                          bottom: 0,
+                          transform: `translateY(${EDGE_THICKNESS}px) rotateX(-90deg)`,
+                          transformOrigin: "top center",
+                          background:
+                            "linear-gradient(to bottom, rgba(160,180,190,0.5), rgba(80,100,110,0.3))",
+                        }}
+                      />
+                    </div>
+                  );
+                }),
+              )}
+            </div>
 
-        {/* Card counter */}
-        <div className="fixed bottom-4 right-8 z-50 text-[10px] uppercase tracking-widest text-zinc-600 font-light">
-          {padTwo(currentIndex + 1)} / {padTwo(photos.length)}
-        </div>
-      </div>
+            {/* Card counter */}
+            <div className="fixed bottom-4 right-8 z-50 text-[10px] uppercase tracking-widest text-zinc-600 font-light">
+              {padTwo(currentIndex + 1)} / {padTwo(photos.length)}
+            </div>
+          </div>
+        </>
+      )}
 
       <PhotoViewer
         photo={selectedPhoto}

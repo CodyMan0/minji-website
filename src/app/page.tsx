@@ -103,6 +103,7 @@ export default function LoadingPage() {
               alt="Loading"
               width={100}
               height={150}
+              className="w-[clamp(60px,13vw,100px)] h-auto"
               priority
             />
           </motion.div>
@@ -121,14 +122,14 @@ export default function LoadingPage() {
             <h1
               className="relative font-normal text-white uppercase leading-[1.54]"
               style={{
-                fontSize: "41px",
+                fontSize: "clamp(1.5rem, 5.5vw, 41px)",
                 letterSpacing: "-0.81px",
               }}
             >
               {displayText}
               <span
                 className="absolute bg-white ml-[3px] animate-blink top-1/2 -translate-y-1/2"
-                style={{ width: "23px", height: "28px" }}
+                style={{ width: "clamp(14px, 3vw, 23px)", height: "clamp(17px, 3.7vw, 28px)" }}
               />
             </h1>
 
@@ -139,7 +140,7 @@ export default function LoadingPage() {
                 transition={{ duration: 1 }}
                 className="text-white uppercase"
                 style={{
-                  fontSize: "18px",
+                  fontSize: "clamp(0.875rem, 2.4vw, 18px)",
                   letterSpacing: "-0.36px",
                   lineHeight: "1.24",
                 }}

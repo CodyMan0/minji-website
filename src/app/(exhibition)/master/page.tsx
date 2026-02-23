@@ -107,6 +107,8 @@ export default function MasterPage() {
 
   const stepOffsets = isMobile ? STEP_OFFSETS_MOBILE : STEP_OFFSETS_DESKTOP;
   const slideOffset = stepOffsets[step] ?? 0;
+  const dotsTop = isMobile ? "calc(50% - 59px)" : "calc(50% - 130px)";
+  const contentPt = isMobile ? "calc(50dvh - 61px)" : "calc(50dvh - 132px)";
 
   return (
     <div className="relative h-[calc(100dvh-5rem)] overflow-hidden text-white">
@@ -118,20 +120,19 @@ export default function MasterPage() {
         <div className="absolute inset-0 pointer-events-none z-20 mx-[5%]">
           <motion.span
             className="absolute w-[clamp(10px,0.81vw,15px)] h-[clamp(12px,1vw,18px)] bg-white"
-            style={{ left: "0%" }}
-            initial={{ opacity: 0, top: "calc(50% - 59px)" }}
+            style={{ left: "0%", top: dotsTop }}
+            initial={{ opacity: 0 }}
             animate={
               phase >= 4
-                ? { opacity: 1, top: "calc(50% - 59px)" }
+                ? { opacity: 1 }
                 : phase >= 1
                   ? {
                       opacity:
                         phase >= 2
                           ? 1
                           : [0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-                      top: "calc(50% - 59px)",
                     }
-                  : { opacity: 0, top: "calc(50% - 59px)" }
+                  : { opacity: 0 }
             }
             transition={
               phase >= 4
@@ -146,13 +147,14 @@ export default function MasterPage() {
           />
           <motion.span
             className="absolute w-[clamp(10px,0.81vw,15px)] h-[clamp(12px,1vw,18px)] bg-white"
-            initial={{ opacity: 0, left: "0%", top: "calc(50% - 59px)" }}
+            style={{ top: dotsTop }}
+            initial={{ opacity: 0, left: "0%" }}
             animate={
               phase >= 4
-                ? { opacity: 1, left: "19%", top: "calc(50% - 59px)" }
+                ? { opacity: 1, left: "19%" }
                 : phase >= 2
-                  ? { opacity: 1, left: "19%", top: "calc(50% - 59px)" }
-                  : { opacity: 0, left: "0%", top: "calc(50% - 59px)" }
+                  ? { opacity: 1, left: "19%" }
+                  : { opacity: 0, left: "0%" }
             }
             transition={
               phase >= 4
@@ -162,21 +164,20 @@ export default function MasterPage() {
           />
           <motion.span
             className="absolute w-[clamp(10px,0.81vw,15px)] h-[clamp(12px,1vw,18px)] bg-white"
-            initial={{ opacity: 0, left: "19%", top: "calc(50% - 59px)" }}
+            style={{ top: dotsTop }}
+            initial={{ opacity: 0, left: "19%" }}
             animate={
               phase >= 4
                 ? {
                     opacity: 1,
                     left: "calc(100% - clamp(10px,0.81vw,15px))",
-                    top: "calc(50% - 59px)",
                   }
                 : phase >= 3
                   ? {
                       opacity: 1,
                       left: "calc(100% - clamp(10px,0.81vw,15px))",
-                      top: "calc(50% - 59px)",
                     }
-                  : { opacity: 0, left: "19%", top: "calc(50% - 59px)" }
+                  : { opacity: 0, left: "19%" }
             }
             transition={
               phase >= 4
@@ -187,7 +188,8 @@ export default function MasterPage() {
         </div>
 
         <motion.div
-          className="relative z-10 pt-[calc(50dvh-62px)]"
+          className="relative z-10"
+          style={{ paddingTop: contentPt }}
           initial={{ opacity: 0, y: 20 }}
           animate={phase >= 4 ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
@@ -220,7 +222,7 @@ export default function MasterPage() {
         </motion.div>
 
         <motion.div
-          className="relative z-10 mt-[2dvh] md:mt-[4dvh]"
+          className="relative z-10 mt-[4dvh] md:mt-[6dvh]"
           initial={{ opacity: 0, y: 20 }}
           animate={step >= 2 ? { opacity: 0.7, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
@@ -239,6 +241,40 @@ export default function MasterPage() {
         </motion.div>
       </motion.div>
 
+      <motion.div
+        className="absolute bottom-14 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1"
+        initial={{ opacity: 0 }}
+        animate={phase >= 4 && step === 0 ? { opacity: 0.5 } : { opacity: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <motion.svg
+          width="16"
+          height="20"
+          viewBox="0 0 16 20"
+          fill="none"
+          className="text-white"
+          animate={{ y: [0, 2, 0] }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+        >
+          <path
+            d="M2 2L8 8L14 2"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M2 10L8 16L14 10"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </motion.svg>
+        <span className="text-white text-[10px] uppercase tracking-widest font-(family-name:--font-ibm-plex-mono) pt-2">
+          Scroll down
+        </span>
+      </motion.div>
     </div>
   );
 }

@@ -26,16 +26,15 @@ export default function Navigation() {
   const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [activeRect, setActiveRect] = useState<TabRect | null>(null);
 
-  const activeIndex = tabs.findIndex(
-    (tab) =>
-      tab.href === pathname ||
-      (pathname === "/countdown" && tab.href === "/master"),
-  );
+  const activeIndex = tabs.findIndex((tab) => tab.href === pathname);
 
   const measureActiveTab = useCallback(() => {
     const container = containerRef.current;
     const activeTab = tabRefs.current[activeIndex];
-    if (!container || !activeTab) return;
+    if (!container || !activeTab) {
+      setActiveRect(null);
+      return;
+    }
 
     const containerBox = container.getBoundingClientRect();
     const tabBox = activeTab.getBoundingClientRect();

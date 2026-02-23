@@ -66,10 +66,10 @@ export default function Navigation() {
           "clamp(0.4rem, 1.22vw, 1.22vw) clamp(0.4rem, 1.33vw, 1.33vw) 0",
       }}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-1.5 flex-wrap md:flex-nowrap">
         <div
           ref={containerRef}
-          className="relative flex items-center bg-[#242424] font-(family-name:--font-ibm-plex-mono)"
+          className="relative flex items-center bg-[#242424] font-(family-name:--font-ibm-plex-mono) min-w-0 flex-shrink"
           style={{
             padding: "clamp(2px, 0.23vw, 4px) clamp(3px, 0.29vw, 5px)",
             gap: "clamp(2px, 0.29vw, 5px)",
@@ -138,7 +138,7 @@ export default function Navigation() {
         </div>
         <Link
           href="/countdown"
-          className={`flex items-center justify-center uppercase tabular-nums font-normal transition-colors min-h-8 md:min-h-11 font-(family-name:--font-ibm-plex-mono) ${
+          className={`flex items-center justify-center uppercase tabular-nums font-normal transition-colors min-h-8 md:min-h-11 font-(family-name:--font-ibm-plex-mono) flex-shrink-0 whitespace-nowrap ${
             pathname === "/countdown"
               ? "bg-white text-black"
               : "bg-[#242424]/70 text-[#707070] hover:text-white"

@@ -44,15 +44,15 @@ export default function CountdownPage() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="fixed inset-0 flex flex-col items-center justify-center gap-[clamp(0.5rem,1vw,1rem)] select-none overflow-hidden"
       >
-        <p className="text-white uppercase pb-10 text-[clamp(0.75rem,1.2vw,1.5rem)] leading-[1.54] tracking-[-0.02em]">
+        <p className="text-white uppercase pb-4 md:pb-10 text-[clamp(0.875rem,1.2vw,1.5rem)] leading-[1.54] tracking-[-0.02em] px-4 text-center">
           WHAT DO YOU THINK IT WAS SHOT ON?
         </p>
 
-        <h1 className="font-normal text-white uppercase tabular-nums text-[clamp(3.2rem,6.7vw,8rem)] leading-none tracking-[-0.02em]">
+        <h1 className="font-normal text-white uppercase tabular-nums text-[clamp(2.5rem,10vw,8rem)] leading-none tracking-[-0.02em]">
           {display}
         </h1>
 
-        <p className="text-white uppercase flex items-center text-[clamp(0.75rem,1.2vw,1.5rem)] leading-[1.54] tracking-[-0.02em] min-h-[1.6em]">
+        <p className="text-white uppercase flex items-center text-[clamp(0.875rem,1.2vw,1.5rem)] leading-[1.54] tracking-[-0.02em] min-h-[1.6em]">
           {revealText}
           <span className="inline-block bg-white ml-[0.15em] w-[0.57em] h-[0.7em] animate-blink" />
         </p>
@@ -96,9 +96,9 @@ export default function CountdownPage() {
                 <img
                   src="/images/unlock-icon.png"
                   alt="Unlock"
-                  className="w-[clamp(0.8rem,1.5vw,2rem)] h-auto"
+                  className="w-[clamp(1.25rem,1.5vw,2rem)] h-auto"
                 />
-                <span className="text-black uppercase text-[clamp(0.6rem,0.8vw,1rem)] tracking-[-0.02em]">
+                <span className="text-black uppercase text-[clamp(0.75rem,0.8vw,1rem)] tracking-[-0.02em]">
                   REVEAL THE ANSWER
                 </span>
               </a>
@@ -114,9 +114,9 @@ export default function CountdownPage() {
               <img
                 src="/images/lock-icon.png"
                 alt="Lock"
-                className="w-[clamp(0.8rem,1.5vw,2rem)] h-auto"
+                className="w-[clamp(1.25rem,1.5vw,2rem)] h-auto"
               />
-              <span className="text-white uppercase text-[clamp(0.6rem,0.8vw,1rem)] tracking-[-0.02em]">
+              <span className="text-white uppercase text-[clamp(0.75rem,0.8vw,1rem)] tracking-[-0.02em]">
                 LOCKED
               </span>
             </button>

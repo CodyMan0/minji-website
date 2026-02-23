@@ -114,20 +114,16 @@ export default function LoadingPage() {
             <h1
               className="relative font-normal text-white uppercase leading-[1.54]"
               style={{
-                fontSize: "clamp(1.5rem, 5.5vw, 41px)",
+                fontSize: "clamp(2rem, 5.5vw, 41px)",
                 letterSpacing: "-0.81px",
               }}
             >
               {displayText}
               <span
-                className="inline-block ml-0.75"
-                style={{ width: "0.3em" }}
-              />
-              <span
                 className="absolute bg-white ml-0.75 animate-blink top-1/2 -translate-y-1/2"
                 style={{
-                  width: "clamp(14px, 3vw, 23px)",
-                  height: "clamp(17px, 3.7vw, 28px)",
+                  width: "0.55em",
+                  height: "0.72em",
                 }}
               />
             </h1>
@@ -137,7 +133,7 @@ export default function LoadingPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.64 }}
                 transition={{ duration: 1 }}
-                className="font-[family-name:var(--font-ibm-plex-mono)] text-white uppercase"
+                className="font-[family-name:var(--font-ibm-plex-mono)] text-white uppercase text-center w-full"
                 style={{
                   fontSize: "clamp(0.75rem, 2vw, 15px)",
                   letterSpacing: "0.01em",

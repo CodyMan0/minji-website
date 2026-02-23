@@ -187,13 +187,14 @@ export default function ExhibitionPage() {
 
   const handleNavigate = useCallback(
     (direction: 1 | -1) => {
-      if (selectedIndex === null) return;
-      const nextIndex =
-        (selectedIndex + direction + photos.length) % photos.length;
-      setSelectedIndex(nextIndex);
-      scrollToPhoto(nextIndex);
+      setSelectedIndex((prev) => {
+        if (prev === null) return null;
+        const nextIndex = (prev + direction + photos.length) % photos.length;
+        scrollToPhoto(nextIndex);
+        return nextIndex;
+      });
     },
-    [selectedIndex, scrollToPhoto],
+    [scrollToPhoto],
   );
 
   const handleClose = useCallback(() => {

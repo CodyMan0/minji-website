@@ -4,7 +4,6 @@ import Image from "next/image";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Photo } from "@/lib/photos";
-import { useSwipe } from "@/hooks/useSwipe";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface PhotoViewerProps {
@@ -47,7 +46,6 @@ export default function PhotoViewer({
   const [direction, setDirection] = useState<1 | -1>(1);
   const isNavigating = useRef(false);
   const isMobile = useIsMobile();
-  const viewerRef = useRef<HTMLDivElement>(null);
 
   const slideOffset = isMobile ? "100vw" : "60vw";
 
@@ -70,10 +68,30 @@ export default function PhotoViewer({
     [onNavigate],
   );
 
-  useSwipe(viewerRef, {
-    onSwipeLeft: () => navigateWithDirection(1),
-    onSwipeRight: () => navigateWithDirection(-1),
-  });
+  // Full-screen swipe for mobile navigation
+  useEffect(() => {
+    if (!photo) return;
+    let startX = 0;
+    let startY = 0;
+
+    const onTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+      if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
+      navigateWithDirection(dx < 0 ? 1 : -1);
+    };
+
+    document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [photo, navigateWithDirection]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -181,7 +199,6 @@ export default function PhotoViewer({
             }
           >
             <div
-              ref={viewerRef}
               className="flex flex-col items-center cursor-default pointer-events-auto"
               onClick={(e) => e.stopPropagation()}
             >

@@ -66,7 +66,7 @@ export default function Navigation() {
           "clamp(0.4rem, 1.22vw, 1.22vw) clamp(0.4rem, 1.33vw, 1.33vw) 0",
       }}
     >
-      <div className="flex items-center justify-between gap-1.5 flex-wrap md:flex-nowrap">
+      <div className="flex items-center justify-between gap-1.5">
         <div
           ref={containerRef}
           className="relative flex items-center bg-[#242424] font-(family-name:--font-ibm-plex-mono) min-w-0 flex-shrink"
@@ -105,14 +105,14 @@ export default function Navigation() {
                 ref={(el) => {
                   tabRefs.current[i] = el;
                 }}
-                className="relative flex items-center justify-center uppercase font-normal min-h-8 md:min-h-11"
+                className="relative flex items-center justify-center uppercase font-normal min-h-7 md:min-h-11 text-center"
                 style={{
                   borderRadius: "clamp(5px, 0.634vw, 10px)",
                   padding:
-                    "clamp(0.2rem, 0.3vw, 0.5rem) clamp(0.5rem, 2.2vw, 2.5rem)",
-                  fontSize: "clamp(0.6875rem, 0.968vw, 1.125rem)",
+                    "clamp(0.1rem, 0.3vw, 0.5rem) clamp(0.4rem, 2.2vw, 2.5rem)",
+                  fontSize: "clamp(9px, 0.968vw, 1.125rem)",
                   letterSpacing: "-0.07em",
-                  lineHeight: "1.54",
+                  lineHeight: "1.16",
                 }}
               >
                 <span
@@ -137,17 +137,17 @@ export default function Navigation() {
         </div>
         <Link
           href="/countdown"
-          className={`flex items-center justify-center uppercase tabular-nums font-normal transition-colors min-h-8 md:min-h-11 font-(family-name:--font-ibm-plex-mono) flex-shrink-0 whitespace-nowrap ${
+          className={`flex items-center justify-center uppercase tabular-nums font-normal transition-colors min-h-7 md:min-h-11 font-(family-name:--font-ibm-plex-mono) flex-shrink-0 whitespace-nowrap ${
             pathname === "/countdown"
               ? "bg-white text-black"
               : "bg-[#242424]/70 text-[#707070] hover:text-white"
           }`}
           style={{
             padding:
-              "clamp(0.2rem, 0.4vw, 0.5rem) clamp(0.5rem, 1.4vw, 1.6rem)",
-            fontSize: "clamp(0.6875rem, 0.968vw, 1.125rem)",
+              "clamp(0.1rem, 0.4vw, 0.5rem) clamp(0.4rem, 1.4vw, 1.6rem)",
+            fontSize: "clamp(9px, 0.968vw, 1.125rem)",
             letterSpacing: "-0.02em",
-            lineHeight: "1.54",
+            lineHeight: "1.16",
             borderRadius: "clamp(6px, 0.764vw, 12px)",
           }}
         >

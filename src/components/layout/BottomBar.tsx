@@ -7,8 +7,11 @@ export default function BottomBar() {
         <div className="hidden md:block">
           &copy; 2026 Xiaomi Korea. All rights reserved.
         </div>
-        <div className="text-center flex-1 md:flex-none">
+        <div className="hidden md:block md:flex-none">
           XIAOMI KOREA X JDZ CHUNG
+        </div>
+        <div className="block text-center flex-1 md:hidden">
+          &copy; 2026 Xiaomi Korea. All rights reserved.
         </div>
         <div className="hidden md:block">ONLINE EXHIBITION</div>
       </div>

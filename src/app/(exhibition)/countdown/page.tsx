@@ -5,7 +5,7 @@ import { useTypewriter } from "@/hooks/useTypewriter";
 import { useDebugDate } from "@/contexts/DebugDateContext";
 import { padTwo } from "@/lib/format";
 import { motion, useAnimation } from "framer-motion";
-import Link from "next/link";
+import { track } from "@vercel/analytics";
 
 export default function CountdownPage() {
   const { adjustedDate } = useDebugDate();
@@ -28,6 +28,7 @@ export default function CountdownPage() {
   const { displayText: revealText } = useTypewriter(revealMessage, 60, 500);
 
   const handleLockedClick = () => {
+    track("locked_button_click");
     navigator.vibrate?.([10, 50, 10]);
     shakeControls.start({
       x: [0, -4, 4, -3, 3, -2, 2, -1, 1, 0],
@@ -89,6 +90,7 @@ export default function CountdownPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="pl-2 pr-4 flex items-center bg-white rounded-xl"
+                onClick={() => track("reveal_button_click")}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

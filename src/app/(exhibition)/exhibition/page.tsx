@@ -168,10 +168,10 @@ export default function ExhibitionPage() {
   const scrollToPhoto = useCallback(
     (index: number) => {
       const progress = getProgressForIndex(index);
-      // Find the closest wrapped position to avoid jumping
+      // Find the closest cycle occurrence of this photo
       const current = targetProgress.current;
-      const currentCycle = Math.round(current / totalCycle) * totalCycle;
-      targetProgress.current = currentCycle + progress;
+      const cycle = Math.round((current - progress) / totalCycle);
+      targetProgress.current = cycle * totalCycle + progress;
     },
     [totalCycle],
   );
@@ -203,6 +203,10 @@ export default function ExhibitionPage() {
 
   const yRatio = DIAGONAL_Y_STEP / DIAGONAL_X_STEP;
 
+  // Current cycle for rendering 3 seamless sets
+  const currentCycle = Math.floor(scrollProgress / totalCycle);
+
+  // Card counter uses wrapped progress
   const wrappedProgress =
     ((scrollProgress % totalCycle) + totalCycle) % totalCycle;
   const currentIndex = Math.min(
@@ -218,21 +222,21 @@ export default function ExhibitionPage() {
         className="fixed inset-0 overflow-hidden"
         style={{ perspective: "1200px", zIndex: 1 }}
       >
-        {/* Diagonal photo strip — 2 sets for seamless loop */}
+        {/* Diagonal photo strip — 3 dynamic sets for seamless loop */}
         <div
           className="absolute w-full h-full"
           style={{
             transformStyle: "preserve-3d",
-            transform: `translate(${-wrappedProgress}vw, ${-wrappedProgress * yRatio}vw)`,
+            transform: `translate(${-scrollProgress}vw, ${-scrollProgress * yRatio}vw)`,
             willChange: "transform",
             opacity: mounted ? 1 : 0,
           }}
         >
-          {[0, 1].flatMap((set) =>
+          {[currentCycle - 1, currentCycle, currentCycle + 1].flatMap((cycle) =>
             photos.map((photo, i) => {
               const x =
-                (i + set * photos.length) * DIAGONAL_X_STEP + X_OFFSET;
-              const y = (i + set * photos.length) * DIAGONAL_Y_STEP;
+                (i + cycle * photos.length) * DIAGONAL_X_STEP + X_OFFSET;
+              const y = (i + cycle * photos.length) * DIAGONAL_Y_STEP;
               const { width: cardW, height: cardH } = getCardSize(
                 photo.width,
                 photo.height,
@@ -241,7 +245,7 @@ export default function ExhibitionPage() {
 
               return (
                 <div
-                  key={`${set}-${photo.id}`}
+                  key={`${cycle}-${photo.id}`}
                   className="absolute cursor-pointer"
                   style={{
                     left: `${x}vw`,

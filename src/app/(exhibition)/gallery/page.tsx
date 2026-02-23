@@ -46,7 +46,7 @@ function TypingTextSection() {
   return (
     <section
       ref={sectionRef}
-      className=" flex flex-col items-center justify-center gap-3 px-8"
+      className="h-dvh flex flex-col items-center justify-center gap-3 px-8"
     >
       <p
         className="uppercase text-center text-white flex items-center justify-center"
@@ -132,7 +132,7 @@ export default function GalleryPage() {
 
   return (
     <>
-      <section className="h-screen px-4 md:px-6 lg:px-8 pt-24 pb-16">
+      <section className="min-h-screen px-4 md:px-6 lg:px-8 pt-24 pb-16">
         <div className="w-full grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 items-start">
           {photos.map((photo, i) => {
             const rowIndex = Math.floor(i / COLUMNS);

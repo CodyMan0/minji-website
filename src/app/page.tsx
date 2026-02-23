@@ -71,9 +71,7 @@ export default function LoadingPage() {
   }
 
   return (
-    <div
-      className="min-h-screen bg-black flex items-center justify-center overflow-hidden"
-    >
+    <div className="min-h-screen bg-black flex items-center justify-center overflow-hidden">
       <AnimatePresence mode="wait">
         {/* Phase 1: Star — bottom-to-top clipPath reveal (matches loading page.mp4) */}
         {phase === "star" && (
@@ -103,8 +101,8 @@ export default function LoadingPage() {
             <Image
               src="/light-loading.svg"
               alt="Loading"
-              width={121}
-              height={167}
+              width={100}
+              height={150}
               priority
             />
           </motion.div>
@@ -123,14 +121,14 @@ export default function LoadingPage() {
             <h1
               className="relative font-normal text-white uppercase leading-[1.54]"
               style={{
-                fontSize: "clamp(2.5rem, 1.49vw, 2rem)",
-                letterSpacing: "-0.02em",
+                fontSize: "41px",
+                letterSpacing: "-0.81px",
               }}
             >
               {displayText}
               <span
-                className="absolute bg-white ml-[0.15em] animate-blink top-1/2 -translate-y-1/2"
-                style={{ width: "0.57em", height: "0.7em" }}
+                className="absolute bg-white ml-[3px] animate-blink top-1/2 -translate-y-1/2"
+                style={{ width: "23px", height: "28px" }}
               />
             </h1>
 
@@ -141,8 +139,8 @@ export default function LoadingPage() {
                 transition={{ duration: 1 }}
                 className="text-white uppercase"
                 style={{
-                  fontSize: "clamp(0.75rem, 0.96vw, 1.25rem)",
-                  letterSpacing: "-0.02em",
+                  fontSize: "18px",
+                  letterSpacing: "-0.36px",
                   lineHeight: "1.24",
                 }}
               >

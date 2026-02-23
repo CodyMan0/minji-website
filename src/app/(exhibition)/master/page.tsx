@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { ARTIST } from "@/lib/constants";
 
 /* ── Intro animation timing (seconds) ── */
@@ -15,11 +14,13 @@ const SQUARE3_APPEAR = SQUARE2_APPEAR + 0.2;
 const CONTENT_FADE_IN = SQUARE3_APPEAR + 0.8;
 
 const WHEEL_THRESHOLD = 50;
-const SCROLL_STEPS = [0, 40, 75];
+const MAX_STEP = 2;
+const STEP_OFFSETS = [0, 0, 30]; // dvh units per step
 
 export default function MasterPage() {
   const [phase, setPhase] = useState(0);
   const [step, setStep] = useState(0);
+  const stepRef = useRef(0);
   const wheelAccum = useRef(0);
   const isTransitioning = useRef(false);
 
@@ -36,6 +37,7 @@ export default function MasterPage() {
   const goStep = useCallback((next: number) => {
     if (isTransitioning.current) return;
     isTransitioning.current = true;
+    stepRef.current = next;
     setStep(next);
     setTimeout(() => {
       isTransitioning.current = false;
@@ -51,18 +53,12 @@ export default function MasterPage() {
 
       if (wheelAccum.current > WHEEL_THRESHOLD) {
         wheelAccum.current = 0;
-        setStep((prev) => {
-          const next = Math.min(prev + 1, SCROLL_STEPS.length - 1);
-          if (next !== prev) goStep(next);
-          return prev;
-        });
+        const next = Math.min(stepRef.current + 1, MAX_STEP);
+        if (next !== stepRef.current) goStep(next);
       } else if (wheelAccum.current < -WHEEL_THRESHOLD) {
         wheelAccum.current = 0;
-        setStep((prev) => {
-          const next = Math.max(prev - 1, 0);
-          if (next !== prev) goStep(next);
-          return prev;
-        });
+        const next = Math.max(stepRef.current - 1, 0);
+        if (next !== stepRef.current) goStep(next);
       }
     };
 
@@ -85,19 +81,11 @@ export default function MasterPage() {
       if (Math.abs(dy) < 50) return;
 
       if (dy > 0) {
-        // Swipe up → next section
-        setStep((prev) => {
-          const next = Math.min(prev + 1, SCROLL_STEPS.length - 1);
-          if (next !== prev) goStep(next);
-          return prev;
-        });
+        const next = Math.min(stepRef.current + 1, MAX_STEP);
+        if (next !== stepRef.current) goStep(next);
       } else {
-        // Swipe down → prev section
-        setStep((prev) => {
-          const next = Math.max(prev - 1, 0);
-          if (next !== prev) goStep(next);
-          return prev;
-        });
+        const next = Math.max(stepRef.current - 1, 0);
+        if (next !== stepRef.current) goStep(next);
       }
     };
 
@@ -109,126 +97,146 @@ export default function MasterPage() {
     };
   }, [phase, goStep]);
 
-  const translateY = SCROLL_STEPS[step];
+  const slideOffset = STEP_OFFSETS[step] ?? 0;
 
   return (
     <div className="relative h-[calc(100dvh-5rem)] overflow-hidden text-white">
-      {/* Background JDZ photo */}
+      {/* ── Single sliding container: everything moves together ── */}
       <motion.div
-        className="absolute inset-0"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: phase >= 4 ? 1 : 0 }}
-        transition={{ duration: 1.5, ease: "easeOut" }}
+        className="relative h-full px-[5%]"
+        animate={{ y: `-${slideOffset}dvh` }}
+        transition={{ duration: 1, ease: [0.33, 1, 0.68, 1] }}
       >
-        <Image
-          src="/images/master-jdz.png"
-          alt="JDZ CHUNG"
-          fill
-          className="object-cover object-top"
-          style={{ mixBlendMode: "luminosity" }}
-          priority
-        />
-      </motion.div>
+        {/* Three squares — aligned with content margins */}
+        <div className="absolute inset-0 pointer-events-none z-20 mx-[5%]">
+          {/* Square 1 — left edge aligned with content */}
+          <motion.span
+            className="absolute w-[clamp(8px,0.7vw,10px)] h-[clamp(8px,0.7vw,10px)] bg-white"
+            style={{ left: "0%" }}
+            initial={{ opacity: 0, top: "calc(50% - 2.5rem)" }}
+            animate={
+              phase >= 4
+                ? { opacity: 1, top: "calc(50% - 2.5rem)" }
+                : phase >= 1
+                  ? {
+                      opacity:
+                        phase >= 2
+                          ? 1
+                          : [0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
+                      top: "calc(50% - 2.5rem)",
+                    }
+                  : { opacity: 0, top: "calc(50% - 2.5rem)" }
+            }
+            transition={
+              phase >= 4
+                ? { duration: 0.8, ease: "easeOut" }
+                : phase >= 2
+                  ? { duration: 0.3 }
+                  : {
+                      duration: BLINK_COUNT * BLINK_DURATION * 2 + 0.4,
+                      ease: "linear",
+                    }
+            }
+          />
+          {/* Square 2 */}
+          <motion.span
+            className="absolute w-[clamp(8px,0.7vw,10px)] h-[clamp(8px,0.7vw,10px)] bg-white"
+            initial={{ opacity: 0, left: "0%", top: "calc(50% - 2.5rem)" }}
+            animate={
+              phase >= 4
+                ? { opacity: 1, left: "19%", top: "calc(50% - 2.5rem)" }
+                : phase >= 2
+                  ? { opacity: 1, left: "19%", top: "calc(50% - 2.5rem)" }
+                  : { opacity: 0, left: "0%", top: "calc(50% - 2.5rem)" }
+            }
+            transition={
+              phase >= 4
+                ? { duration: 0.8, ease: "easeOut" }
+                : { duration: 0.5, ease: "easeOut" }
+            }
+          />
+          {/* Square 3 — right edge aligned with content */}
+          <motion.span
+            className="absolute w-[clamp(8px,0.7vw,10px)] h-[clamp(8px,0.7vw,10px)] bg-white"
+            initial={{ opacity: 0, left: "19%", top: "calc(50% - 2.5rem)" }}
+            animate={
+              phase >= 4
+                ? {
+                    opacity: 1,
+                    left: "calc(100% - clamp(8px,0.7vw,10px))",
+                    top: "calc(50% - 2.5rem)",
+                  }
+                : phase >= 3
+                  ? {
+                      opacity: 1,
+                      left: "calc(100% - clamp(8px,0.7vw,10px))",
+                      top: "calc(50% - 2.5rem)",
+                    }
+                  : { opacity: 0, left: "19%", top: "calc(50% - 2.5rem)" }
+            }
+            transition={
+              phase >= 4
+                ? { duration: 0.8, ease: "easeOut" }
+                : { duration: 0.6, ease: "easeOut" }
+            }
+          />
+        </div>
 
-      {/* Three squares — fixed position */}
-      <div className="absolute inset-0 pointer-events-none z-20">
-        <motion.span
-          className="absolute w-[clamp(8px,0.7vw,10px)] h-[clamp(8px,0.7vw,10px)] bg-white"
-          style={{ left: "5%", top: "15%" }}
-          initial={{ opacity: 0 }}
-          animate={
-            phase >= 1
-              ? {
-                  opacity:
-                    phase >= 2 ? 1 : [0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-                }
-              : { opacity: 0 }
-          }
-          transition={
-            phase >= 2
-              ? { duration: 0.3 }
-              : {
-                  duration: BLINK_COUNT * BLINK_DURATION * 2 + 0.4,
-                  ease: "linear",
-                }
-          }
-        />
-        <motion.span
-          className="absolute w-[clamp(8px,0.7vw,10px)] h-[clamp(8px,0.7vw,10px)] bg-white"
-          style={{ top: "15%" }}
-          initial={{ opacity: 0, left: "5%" }}
-          animate={
-            phase >= 2
-              ? { opacity: 1, left: "28%" }
-              : { opacity: 0, left: "5%" }
-          }
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        />
-        <motion.span
-          className="absolute w-[clamp(8px,0.7vw,10px)] h-[clamp(8px,0.7vw,10px)] bg-white"
-          style={{ top: "15%" }}
-          initial={{ opacity: 0, left: "28%" }}
-          animate={
-            phase >= 3
-              ? { opacity: 1, left: "95%" }
-              : { opacity: 0, left: "28%" }
-          }
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        />
-      </div>
-
-      {/* ── Sliding content layer ── */}
-      <motion.div
-        className="relative z-10 px-[5%]"
-        animate={{ y: `-${translateY}%` }}
-        transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
-      >
         {/* Hero: title + bio */}
         <motion.div
-          className="h-[calc(100dvh-5rem)] flex flex-col justify-center"
-          initial={{ opacity: 0, y: 15 }}
-          animate={phase >= 4 ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
+          className="relative z-10"
+          style={{ paddingTop: "calc(50dvh - 4rem + 2rem)" }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={phase >= 4 ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          <div className="mt-[-5%]">
-            <h1 className="text-[clamp(1.2rem,2vw,2.2rem)] font-semibold mb-5 tracking-tight">
-              마스터 포토그래퍼 JDZ
-            </h1>
-            <p className="text-[clamp(0.7rem,1vw,0.95rem)] leading-[1.75] text-white/90 max-w-3xl whitespace-pre-line">
-              {ARTIST.bio}
-            </p>
-          </div>
+          <h1 className="text-[clamp(1.2rem,1.75vw,2rem)] font-semibold mb-3 leading-[1.54] tracking-[-0.02em]">
+            마스터 포토그래퍼 JDZ
+          </h1>
+          <p className="text-[clamp(0.7rem,1.18vw,1.1rem)] leading-[1.64] tracking-[-0.02em] text-white max-w-3xl whitespace-pre-line">
+            {ARTIST.bio}
+          </p>
         </motion.div>
 
         {/* 01 ABOUT */}
-        <div className="h-[calc(100dvh-5rem)] flex flex-col justify-center">
-          <div>
-            <div className="flex items-end gap-6 md:gap-20 mb-6">
-              <p className="text-[clamp(1.2rem,2vw,2rem)] font-light">01</p>
-              <p className="text-[clamp(1.2rem,2vw,2rem)] font-light uppercase tracking-wider">
-                ABOUT
-              </p>
-            </div>
-            <p className="text-[clamp(0.7rem,0.9vw,0.875rem)] leading-[1.75] text-white/85 max-w-4xl whitespace-pre-line">
-              {ARTIST.about}
+        <motion.div
+          className="relative z-10 mt-[4dvh]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={step >= 1 ? { opacity: 0.7, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <div className="flex items-end gap-[16%] mb-4">
+            <p className="text-[clamp(0.8rem,1.3vw,1.2rem)] font-normal leading-[1.54] tracking-[-0.02em]">
+              01
+            </p>
+            <p className="text-[clamp(0.8rem,1.3vw,1.2rem)] font-normal leading-[1.54] tracking-[-0.02em] uppercase">
+              ABOUT
             </p>
           </div>
-        </div>
+          <p className="text-[clamp(0.7rem,1.25vw,1.1rem)] font-light leading-[1.64] tracking-[-0.05em] text-white max-w-4xl whitespace-pre-line">
+            {ARTIST.about}
+          </p>
+        </motion.div>
 
         {/* 02 PHILOSOPHY */}
-        <div className="h-[calc(100dvh-5rem)] flex flex-col justify-center">
-          <div>
-            <div className="flex items-end gap-6 md:gap-20 mb-6">
-              <p className="text-[clamp(1.2rem,2vw,2rem)] font-light">02</p>
-              <p className="text-[clamp(1.2rem,2vw,2rem)] font-light uppercase tracking-wider">
-                PHILOSOPHY
-              </p>
-            </div>
-            <p className="text-[clamp(0.7rem,0.9vw,0.875rem)] leading-[1.75] text-white/85 max-w-4xl whitespace-pre-line">
-              {ARTIST.philosophy}
+        <motion.div
+          className="relative z-10 mt-[4dvh]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={step >= 2 ? { opacity: 0.7, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <div className="flex items-end gap-[16%] mb-4">
+            <p className="text-[clamp(0.8rem,1.3vw,1.2rem)] font-normal leading-[1.54] tracking-[-0.02em]">
+              02
+            </p>
+            <p className="text-[clamp(0.8rem,1.3vw,1.2rem)] font-normal leading-[1.54] tracking-[-0.02em] uppercase">
+              PHILOSOPHY
             </p>
           </div>
-        </div>
+          <p className="text-[clamp(0.7rem,1.25vw,1.1rem)] font-light leading-[1.64] tracking-[-0.05em] text-white max-w-4xl whitespace-pre-line">
+            {ARTIST.philosophy}
+          </p>
+        </motion.div>
       </motion.div>
     </div>
   );

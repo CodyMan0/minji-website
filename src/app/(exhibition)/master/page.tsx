@@ -14,14 +14,24 @@ const CONTENT_FADE_IN = SQUARE3_APPEAR + 0.8;
 
 const WHEEL_THRESHOLD = 50;
 const MAX_STEP = 2;
-const STEP_OFFSETS = [0, 0, 20];
+const STEP_OFFSETS_DESKTOP = [0, 0, 32];
+const STEP_OFFSETS_MOBILE = [0, 0, 30];
 
 export default function MasterPage() {
   const [phase, setPhase] = useState(0);
   const [step, setStep] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const stepRef = useRef(0);
   const wheelAccum = useRef(0);
   const isTransitioning = useRef(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   useEffect(() => {
     const timers = [
@@ -95,7 +105,8 @@ export default function MasterPage() {
     };
   }, [phase, goStep]);
 
-  const slideOffset = STEP_OFFSETS[step] ?? 0;
+  const stepOffsets = isMobile ? STEP_OFFSETS_MOBILE : STEP_OFFSETS_DESKTOP;
+  const slideOffset = stepOffsets[step] ?? 0;
 
   return (
     <div className="relative h-[calc(100dvh-5rem)] overflow-hidden text-white">
@@ -108,19 +119,19 @@ export default function MasterPage() {
           <motion.span
             className="absolute w-[clamp(10px,0.81vw,15px)] h-[clamp(12px,1vw,18px)] bg-white"
             style={{ left: "0%" }}
-            initial={{ opacity: 0, top: "calc(50% - 69px)" }}
+            initial={{ opacity: 0, top: "calc(45% - 9px)" }}
             animate={
               phase >= 4
-                ? { opacity: 1, top: "calc(50% - 69px)" }
+                ? { opacity: 1, top: "calc(45% - 9px)" }
                 : phase >= 1
                   ? {
                       opacity:
                         phase >= 2
                           ? 1
                           : [0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-                      top: "calc(50% - 69px)",
+                      top: "calc(45% - 9px)",
                     }
-                  : { opacity: 0, top: "calc(50% - 69px)" }
+                  : { opacity: 0, top: "calc(45% - 9px)" }
             }
             transition={
               phase >= 4
@@ -135,13 +146,13 @@ export default function MasterPage() {
           />
           <motion.span
             className="absolute w-[clamp(10px,0.81vw,15px)] h-[clamp(12px,1vw,18px)] bg-white"
-            initial={{ opacity: 0, left: "0%", top: "calc(50% - 69px)" }}
+            initial={{ opacity: 0, left: "0%", top: "calc(45% - 9px)" }}
             animate={
               phase >= 4
-                ? { opacity: 1, left: "19%", top: "calc(50% - 69px)" }
+                ? { opacity: 1, left: "19%", top: "calc(45% - 9px)" }
                 : phase >= 2
-                  ? { opacity: 1, left: "19%", top: "calc(50% - 69px)" }
-                  : { opacity: 0, left: "0%", top: "calc(50% - 69px)" }
+                  ? { opacity: 1, left: "19%", top: "calc(45% - 9px)" }
+                  : { opacity: 0, left: "0%", top: "calc(45% - 9px)" }
             }
             transition={
               phase >= 4
@@ -151,21 +162,21 @@ export default function MasterPage() {
           />
           <motion.span
             className="absolute w-[clamp(10px,0.81vw,15px)] h-[clamp(12px,1vw,18px)] bg-white"
-            initial={{ opacity: 0, left: "19%", top: "calc(50% - 69px)" }}
+            initial={{ opacity: 0, left: "19%", top: "calc(45% - 9px)" }}
             animate={
               phase >= 4
                 ? {
                     opacity: 1,
                     left: "calc(100% - clamp(10px,0.81vw,15px))",
-                    top: "calc(50% - 69px)",
+                    top: "calc(45% - 9px)",
                   }
                 : phase >= 3
                   ? {
                       opacity: 1,
                       left: "calc(100% - clamp(10px,0.81vw,15px))",
-                      top: "calc(50% - 69px)",
+                      top: "calc(45% - 9px)",
                     }
-                  : { opacity: 0, left: "19%", top: "calc(50% - 69px)" }
+                  : { opacity: 0, left: "19%", top: "calc(45% - 9px)" }
             }
             transition={
               phase >= 4
@@ -176,7 +187,7 @@ export default function MasterPage() {
         </div>
 
         <motion.div
-          className="relative z-10 pt-[calc(50dvh-70px)] md:pt-[calc(22%+65px)]"
+          className="relative z-10 pt-[calc(45dvh+23px)] md:pt-[calc(22%+110px)]"
           initial={{ opacity: 0, y: 20 }}
           animate={phase >= 4 ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
@@ -184,13 +195,13 @@ export default function MasterPage() {
           <h1 className="text-[clamp(1.2rem,1.75vw,2rem)] font-normal mb-3 md:mb-5 leading-[1.54] tracking-[-0.02em]">
             마스터 포토그래퍼 JDZ
           </h1>
-          <p className="text-[clamp(0.7rem,1.18vw,1.1rem)] leading-[1.64] tracking-[-0.02em] text-white max-w-3xl whitespace-pre-line">
+          <p className="text-[clamp(0.7rem,1.18vw,1.1rem)] leading-[1.64] tracking-[-0.02em] text-white max-w-3xl md:whitespace-pre-line">
             {ARTIST.bio}
           </p>
         </motion.div>
 
         <motion.div
-          className="relative z-10 mt-[4dvh] md:mt-[9dvh]"
+          className="relative z-10 mt-[4dvh] md:mt-[6dvh]"
           initial={{ opacity: 0, y: 20 }}
           animate={step >= 1 ? { opacity: 0.7, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
@@ -203,7 +214,7 @@ export default function MasterPage() {
               ABOUT
             </p>
           </div>
-          <p className="text-[clamp(0.7rem,1.25vw,1.1rem)] font-normal leading-[1.64] tracking-[-0.05em] text-white max-w-4xl whitespace-pre-line">
+          <p className="text-[clamp(0.7rem,1.25vw,1.1rem)] font-normal leading-[1.64] tracking-[-0.05em] text-white max-w-4xl md:whitespace-pre-line">
             {ARTIST.about}
           </p>
         </motion.div>
@@ -222,10 +233,38 @@ export default function MasterPage() {
               PHILOSOPHY
             </p>
           </div>
-          <p className="text-[clamp(0.7rem,1.25vw,1.1rem)] font-normal leading-[1.64] tracking-[-0.05em] text-white max-w-4xl whitespace-pre-line">
+          <p className="text-[clamp(0.7rem,1.25vw,1.1rem)] font-normal leading-[1.64] tracking-[-0.05em] text-white max-w-4xl md:whitespace-pre-line">
             {ARTIST.philosophy}
           </p>
         </motion.div>
+      </motion.div>
+
+      <motion.div
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1"
+        initial={{ opacity: 0 }}
+        animate={phase >= 4 && step === 0 ? { opacity: 0.5 } : { opacity: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <span className="text-white text-[10px] uppercase tracking-[0.1em] font-(family-name:--font-ibm-plex-mono)">
+          Scroll
+        </span>
+        <motion.svg
+          width="14"
+          height="14"
+          viewBox="0 0 14 14"
+          fill="none"
+          className="text-white"
+          animate={{ y: [0, 4, 0] }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+        >
+          <path
+            d="M1 5L7 11L13 5"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </motion.svg>
       </motion.div>
     </div>
   );

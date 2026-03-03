@@ -57,70 +57,74 @@ export default function CountdownPage() {
         </p>
 
         <div className="mt-[20px] min-h-[2.5rem]">
-        {unlocked ? (
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{
-              scale: [0.9, 1.08, 1],
-              opacity: 1,
-              boxShadow: [
-                "0 0 0px rgba(255,255,255,0)",
-                "0 0 30px rgba(255,255,255,0.6)",
-                "0 0 0px rgba(255,255,255,0)",
-              ],
-            }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="rounded-[11px]"
-          >
+          {unlocked ? (
             <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
               animate={{
-                scale: [1, 1.02, 1],
+                scale: [0.9, 1.08, 1],
+                opacity: 1,
                 boxShadow: [
                   "0 0 0px rgba(255,255,255,0)",
-                  "0 0 15px rgba(255,255,255,0.4)",
+                  "0 0 30px rgba(255,255,255,0.6)",
                   "0 0 0px rgba(255,255,255,0)",
                 ],
               }}
-              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
               className="rounded-[11px]"
             >
-              <a
-                href="https://sgp-api.buy.mi.com/i18n_op/opx/kr/product-station/preview/kr/event/2026/xiaomi-launch-february-2026?id=9837344#"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="pl-2 pr-4 flex items-center bg-white rounded-[11px]"
-                onClick={() => track("reveal_button_click")}
+              <motion.div
+                animate={{
+                  scale: [1, 1.02, 1],
+                  boxShadow: [
+                    "0 0 0px rgba(255,255,255,0)",
+                    "0 0 15px rgba(255,255,255,0.4)",
+                    "0 0 0px rgba(255,255,255,0)",
+                  ],
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 2,
+                  ease: "easeInOut",
+                }}
+                className="rounded-[11px]"
+              >
+                <a
+                  href="https://www.mi.com/kr/event/xiaomi-17-series"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pl-2 pr-4 flex items-center bg-white rounded-[11px]"
+                  onClick={() => track("reveal_button_click")}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/images/unlock-icon.png"
+                    alt="Unlock"
+                    className="w-[clamp(1.25rem,1.5vw,2rem)] h-auto"
+                  />
+                  <span className="text-black uppercase text-[clamp(0.75rem,0.8vw,1rem)] tracking-[-0.02em]">
+                    REVEAL THE ANSWER
+                  </span>
+                </a>
+              </motion.div>
+            </motion.div>
+          ) : (
+            <motion.div animate={shakeControls}>
+              <button
+                onClick={handleLockedClick}
+                className="pl-2 pr-4 flex items-center bg-[#737373] rounded-[11px] cursor-not-allowed select-none"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/images/unlock-icon.png"
-                  alt="Unlock"
+                  src="/images/lock-icon.png"
+                  alt="Lock"
                   className="w-[clamp(1.25rem,1.5vw,2rem)] h-auto"
                 />
-                <span className="text-black uppercase text-[clamp(0.75rem,0.8vw,1rem)] tracking-[-0.02em]">
-                  REVEAL THE ANSWER
+                <span className="text-white uppercase text-[clamp(0.75rem,0.8vw,1rem)] tracking-[-0.02em]">
+                  LOCKED
                 </span>
-              </a>
+              </button>
             </motion.div>
-          </motion.div>
-        ) : (
-          <motion.div animate={shakeControls}>
-            <button
-              onClick={handleLockedClick}
-              className="pl-2 pr-4 flex items-center bg-[#737373] rounded-[11px] cursor-not-allowed select-none"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/lock-icon.png"
-                alt="Lock"
-                className="w-[clamp(1.25rem,1.5vw,2rem)] h-auto"
-              />
-              <span className="text-white uppercase text-[clamp(0.75rem,0.8vw,1rem)] tracking-[-0.02em]">
-                LOCKED
-              </span>
-            </button>
-          </motion.div>
-        )}
+          )}
         </div>
       </motion.div>
     </>
